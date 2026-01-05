@@ -826,7 +826,6 @@ export default class GameScene extends Phaser.Scene {
     // console.log('ratio', ratio)
 
     const RTP = 1 - this.houseEdge / 100
-    const houseEdge = .05
 
     let acc = 0
 
@@ -836,20 +835,23 @@ export default class GameScene extends Phaser.Scene {
     for (let i = 0; i <= crashSetting.steps; i++) {
       let multiplier, base, real_multyplier
       if (i === 0) {
-        multiplier = 1
-        real_multyplier = 1
+        multiplier = 0
         base = 0
+      } else if (i === crashSetting.steps) {
+        multiplier = crashSetting.maxPayout
+        base = RTP / multiplier
+      }
+      else if (i === 1) {
+        multiplier = crashSetting.minPayout
+        base = RTP / multiplier
       } else {
         multiplier = crashSetting.minPayout * Math.pow(ratio, i - 1)
         base = RTP / multiplier
-        real_multyplier = multiplier
-        if (i !== crashSetting.steps - 1 && i !== 1) real_multyplier *= (1 - houseEdge)
       }
 
       crashTable.push({
         step: i,
         multiplier,
-        real_multyplier,
         probability: undefined,
         acc: undefined,
         base,

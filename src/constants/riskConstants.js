@@ -1,5 +1,5 @@
 export const DEFAULT_RISK_SETTING = {
-  steps: 100,
+  steps: 20,
   minPayout: 1.01,
-  maxPayout: 200,
+  maxPayout: 1000,
 }

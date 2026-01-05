@@ -1,47 +1,65 @@
-import { Scale } from "phaser"
-
 export class Platforms {
     constructor(scene) {
         this.scene = scene
 
-        this.init()
-        this.create()
+        // ВАЖНО: GameScene.roundPrepare использует this.platforms.hiddingCount
+        // (см. GameScene.roundPrepare) — без этого будет NaN и раунд не стартанёт.
+        this.hiddingCount = 5
 
-    }
-    init() {
-        this.startAmount = 5
-        this.centerX = this.scene.sceneCenterX
-        this.duration = this.scene.duration
+        this.ballX = scene.ballX
+        this.ballY = scene.ballY
+        this.duration = scene.duration
         this.depth = 10
-        this.hitPointY = this.scene.hitPointY
+
+        this.hitPointY = scene.hitPointY
         // изменить калькуляцию!!!
-        this.groupTotalHeight = 180
+        this.groupTotalHeight = 240
         this.blockWidth = 180
 
         this.payTable = []
         this.lastKnownStep = 0 // индекс шага для рендера чисел (count из событий)
         this.chessPhase = 0
 
-        this.blocks = []
-        this.currentPattern = null
-        this.currentPatternId = null
-
         // Паттерны
         this.blockMap = [
-            { pattern: [1] }, // одиночный не используем как активный сет
-            { pattern: [1, 1] },
-            { pattern: [1, 1, 1] },
-            { pattern: [1, 1, 1, 1] },
+            { pattern: [1], weight: 1, transitions: [] }, // одиночный не используем как активный сет
+            { pattern: [1, 1], weight: 10, transitions: [] },
+            // { pattern: [1, 2], weight: 10, transitions: [] },
+            // { pattern: [2, 1], weight: 10, transitions: [] },
+            // { pattern: [3, 1], weight: 10, transitions: [] },
+            // { pattern: [1, 3], weight: 10, transitions: [] },
+            { pattern: [1, 1, 1], weight: 10, transitions: [] },
+            // { pattern: [2, 1, 1], weight: 10, transitions: [] },
             { pattern: [1, 1, 1, 1, 1] },
-            { pattern: [1, 1, 1, 1, 1, 1] },
+            { pattern: [1, 1, 1, 1], weight: 10, transitions: [] },
+            { pattern: [1, 1, 1, 1, 1, 1], weight: 10, transitions: [] },
         ]
+
+        // dev
+        this.buildAvatarFrames(this.blockMap)
+
         this.compiledMap = this.compileBlockMap(this.blockMap)
 
-        this.initBonusSceme()
-    }
-    initBonusSceme() {
+        this.multiplierToAmount = () => {
+            const stepLeft = this.payTable.length - 1 - this.lastKnownStep
+            // console.log('stepLeft', stepLeft)
+            if (stepLeft <= 0) return 1
+
+            let amount = 6
+            if (this.lastKnownMulty >= 2) amount = 4
+            if (this.lastKnownMulty >= 10) amount = 3
+            if (this.lastKnownMulty >= 100) amount = 2
+
+            // ближайшее меньшее (или равное) из 6-4-3-2-1
+            const STEPS = [6, 4, 3, 2, 1]
+            amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
+
+            return amount
+        }
+
+
         this.patternProbabilities = 0.25 // 0.25 норм
-        return
+
         // dev
         const HE = this.scene.houseEdge
         const r = 1 - HE / 100
@@ -65,56 +83,27 @@ export class Platforms {
         }
         // console.log('Platforms patternProbabilities expected visible blocks:',
         // ev(this.patternProbabilities).toFixed(4), (1 / ev(this.patternProbabilities)).toFixed(0))
-    }
-    create() {
-        // this.createAssets()
-        this.createEvents()
-        this.createBlocks()
-        this.createLastBlock()
-    }
-    createBlocks() {
+
         // Один сет (одна группа) в точке касания
         this.root = this.scene.add
-            .container(this.centerX, this.hitPointY)
+            .container(this.ballX, this.hitPointY)
             .setDepth(this.depth)
 
         this.setContainer = this.scene.add.container(0, 0)
         this.root.add(this.setContainer)
+
+        this.blocks = []
+        this.currentPattern = null
+        this.currentPatternId = null
+
+        // this.createAssets()
+        this.createEvents()
     }
-    createLastBlock() {
-        const height = 60
 
-        this.lastBlock = this.scene.add
-            .container(this.centerX, this.hitPointY + this.groupTotalHeight)
-            .setDepth(this.depth)
+    // -----------------------
+    // Assets & Events
+    // -----------------------
 
-        const block = this.createBlockRect(this.blockWidth, height, this.scene.standartColors.dark_gray)
-
-        const text = this.scene.add
-            .text(0, height / 2, '', {
-                fontSize: '20px',
-                // color: index === 0 ? scene.textColors.red : scene.textColors.black,
-                color: this.scene.textColors.black,
-                // fontFamily: 'AvenirBlack',
-                fontFamily: 'JapanRobot',
-                fontSize: '24px',
-                fill: this.scene.textColors.white,
-            })
-            .setOrigin(0.5, 0.5)
-
-        const frame = this.createBlockFrame(this.blockWidth, height)
-
-        this.lastBlock.add([block, text, frame])
-        this.lastBlock.__text = text
-
-        this.lastBlock.update = () => {
-            const lastMulty = this.payTable[this.payTable.length - 1].multiplier
-
-            this.payTable
-            this.lastBlock.__text.setText(lastMulty.toFixed(2))
-        }
-
-    }
     createAssets() {
         this.scene.createGradientTexture('fadeWhiteRect', '255,255,255', 120, 160)
         this.scene.createGradientTexture('fadeRedRect', '255,0,0', 120, 160)
@@ -217,10 +206,9 @@ export class Platforms {
 
     startSet() {
         // стартовый паттерн: любой, но не одиночный
-        const startCandidates = this.compiledMap.list.filter((p) => p.blocks === this.startAmount)
+        const startCandidates = this.compiledMap.list.filter((p) => p.blocks === 6)
         const start = this.weightedPick(startCandidates)
         this.applyPattern(start, { immediate: true })
-        this.lastBlock.update()
     }
 
     onBounce(data) {
@@ -329,11 +317,27 @@ export class Platforms {
         // if (bonus > 0) this.scene.sounds.puck.play({})
 
         if (immediate) {
-            this.root.x = this.centerX
+            this.root.x = this.ballX
             this.root.y = this.hitPointY
             this.setContainer.y = 0
         }
     }
+
+    // -----------------------
+    // Rendering multipliers
+    // -----------------------
+    // setNextMulty(step) {
+    //     let text = ''
+    //     const table = this.payTable
+    //     const row = table[step]
+    //     // console.log('setNextMulty step:', step, 'row:', row)
+
+    //     const m = row.multiplier
+    //     text = m >= 1000 ? m.toFixed(0) : m >= 100 ? m.toFixed(1) : m.toFixed(2)
+    //     this.scene.countdownCounter.show(1)
+
+    //     this.scene.countdownCounter.set(text)
+    // }
     renderMultipliers(startStep) {
         // startStep = какой индекс payTable показываем на верхнем блоке
         const table = this.payTable
@@ -391,23 +395,8 @@ export class Platforms {
 
         return this.weightedPick(candidates)
     }
-    multiplierToAmount = () => {
-        const stepLeft = this.payTable.length - 1 - this.lastKnownStep
-        // console.log('stepLeft', stepLeft)
-        if (stepLeft <= 0) return 1
 
-        let amount = 5
-        if (this.lastKnownMulty >= 2) amount = 4
-        if (this.lastKnownMulty >= 10) amount = 3
-        if (this.lastKnownMulty >= 100) amount = 2
-
-        // ближайшее меньшее (или равное) из 6-4-3-2-1
-        const STEPS = [5, 4, 3, 2, 1]
-        amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
-
-        return amount
-    }
-    __pickNextPattern(prevId) {
+    pickNextPattern_(prevId) {
         let candidates = this.compiledMap.list.filter((p) => p.blocks >= 2)
         // return candidates[0] // dev
 
@@ -464,11 +453,10 @@ export class Platforms {
 
     createBlockFrame(width, height, color) {
         const g = this.scene.add.graphics()
-        // console.log('frame color', width, height, color)
-        // console.log('frame color', this.scene.standartColors.black)
+
         // параметры стиля
         const strokeWidth = 4
-        const strokeColor = this.scene.standartColors.black // color ? color : 
+        const strokeColor = color ? color : this.scene.standartColors.dark_gray
         const alpha = 1
 
         g.__x = -width / 2 + strokeWidth / 2;
@@ -520,23 +508,25 @@ export class Platforms {
         const patternIndent = 0
         let pattern = null
 
-        // isBonus = false // dev
-        const stampScale = heightPx / 80 // размер печати
-        const stampIndent = isWhite ? -140 : 140
+        isBonus = false // dev
 
         if (isBonus) {
             block.__bonus = true
 
-            pattern = scene.add.image(-50, heightPx / 2, 'stamp')
-                .setOrigin(0.5)
-                // .setDisplaySize(this.blockWidth - 100, heightPx)
+            pattern = scene.add.image(0, 0, 'avatar', `slice_${blocksCount}_${index}`)
+                .setOrigin(0.5, 0)
+                .setDisplaySize(this.blockWidth, heightPx)
                 .setAlpha(0)
-                .setScale(stampScale)
 
-            // pattern = scene.add.image(0, 0, 'avatar', `slice_${blocksCount}_${index}`)
-            //     .setOrigin(0.5, 0)
-            //     .setDisplaySize(this.blockWidth, heightPx)
-            //     .setAlpha(0)
+            // var 1
+            // pattern = scene.add.tileSprite(
+            //     0,
+            //     0,
+            //     this.blockWidth - patternIndent * 2,
+            //     heightPx - patternIndent * 2,
+            //     'pattern'
+            // ).setOrigin(0.5, 0).setAlpha(0.0)
+
 
         } else {
             // если не бонусная картинка, то паттерн из стандартных
@@ -550,9 +540,9 @@ export class Platforms {
             ).setOrigin(0.5).setAlpha(0)
         }
 
-        const frame = this.createBlockFrame(this.blockWidth, heightPx, this.scene.standartColors.dark_gray)
+        const frame = this.createBlockFrame(this.blockWidth, heightPx, this.scene.standartColors.black)
 
-        block.add([back, rect, frame, pattern, text])
+        block.add([back, rect, pattern, frame, text])
         // block.setMask(mask);
         // block.__bonus = true // dev
         block.__rect = rect
@@ -592,7 +582,8 @@ export class Platforms {
         })
 
     }
-    __showBonusBlocks() {
+
+    showBonusBlocks() {
         let count = 0
         const delay = 80 // 70 60
         const half = 120   // 100 100
@@ -728,72 +719,7 @@ export class Platforms {
         }
         const left = this.blocks.length - count
         if (left <= 2) {
-            // console.log('left', left)
-        }
-
-        if (left === 0) {
-            console.log('bonus')
-        }
-    }
-    showBonusBlocks() {
-        let count = 0
-        const delay = 80 // 70 60
-        const half = 120   // 100 100
-        const treshold = 1.5
-
-        this.blocks.forEach((block) => {
-            if (!block.__bonus) return
-            const d = count * delay
-            const stamp = block.__pattern
-            const scale = stamp.scale
-
-            // var2
-            this.scene.tweens.add({
-                targets: stamp,
-                alpha: 1,
-                // y: front.y + height,
-                // scaleY: scaleY,
-                scale: scale * 1.2,
-                delay: d,
-                duration: 20,
-                ease: 'Cubic.easeIn', // easeIn easeOut
-                onComplete: () => {
-                    stamp.scale = scale
-                },
-            })
-
-            // var1
-            // stamp.scaleY = 0
-            // stamp.alpha = 1
-
-            // this.scene.tweens.add({
-            //     targets: stamp,
-            //     // alpha: 1,
-            //     // y: front.y + height,
-            //     scaleY: scaleY,
-            //     delay: d,
-            //     duration: half,
-            //     ease: 'Cubic.easeIn', // easeIn easeOut
-            //     onComplete: () => { },
-            // })
-
-
-            count++
-        })
-        if (this.scene.timeScale > treshold && count > 0) {
-            // one sound
-            setTimeout(() => {
-                const detune = 1800 + Phaser.Math.Between(0, 400) // was
-                // this.scene.sounds.domino.play({ detune: detune })
-            }, delay)
-        }
-        const left = this.blocks.length - count
-        if (left <= 2) {
-            // console.log('left', left)
-        }
-
-        if (left === 0) {
-            console.log('bonus')
+            console.log('left', left)
         }
     }
 

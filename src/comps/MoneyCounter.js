@@ -5,6 +5,18 @@ export class MoneyCounter {
     this.x = 625
     this.y = 44
 
+    this.label = this.scene.add
+      .text(this.x, this.y - 25, 'DEPOSIT', {
+        // fontFamily: 'AvenirNextCondensedBold',
+        // fontSize: '18px',
+        color: this.scene.labelColor,
+        font: this.scene.labelFont
+      })
+      .setOrigin(1, 0.5)
+      .setAlign('right')
+      .setAlpha(1)
+      .setDepth(210)
+
     this.counter = scene.add
       .text(this.x, this.y, initial.toFixed(2), {
         // font: '24px walibi',

@@ -51,7 +51,7 @@ export default class PreloadScene extends Phaser.Scene {
     })
   }
   createScreen() {
-    this.add.image(0, 0, 'boot_bg').setOrigin(0).setAlpha(1).setScale(1)
+    this.add.image(0, 0, 'boot_bg').setOrigin(0).setAlpha(0).setScale(1)
   }
   createProgressBar() {
     let barWidth = 302
@@ -83,6 +83,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('co', 'assets/sprites/dev/co_2.png')
     // this.load.image('bot_chat', 'assets/sprites/dev/bot_chart_4.jpg')
     this.load.image('avatar', 'assets/sprites/bonus/avatar_2.jpg')
+    this.load.image('stamp', 'assets/sprites/bonus/stamp.png')
 
     // атласы
     this.load.atlas(
@@ -91,7 +92,7 @@ export default class PreloadScene extends Phaser.Scene {
       'assets/sprites/sheets/smileys.json'
     )
     // bg
-    this.load.image('main_bg', 'assets/sprites/bg/BOUNCE_FUJI_BG_3.png')
+    this.load.image('main_bg', 'assets/sprites/bg/BONZA_6.png')
     // this.load.image('tuner_bg', 'assets/sprites/bg/tuner_bg.jpg')
     this.load.image('pattern', 'assets/sprites/bg/pattern.jpg')
     // console.log('pattern texture key:', pattern.texture.key)

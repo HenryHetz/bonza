@@ -16,6 +16,7 @@ import { BotManager } from '../comps/BotManager'
 import { RiskSettingNotice } from '../comps/RiskSettingNotice'
 import { CountdownCounter } from '../comps/CountdownCounter'
 import { MoneyCounter } from '../comps/MoneyCounter'
+import { ModeLabel } from '../comps/ModeLabel'
 import { Skull } from '../comps/Skull'
 import { Ball } from '../comps/Ball'
 import { Platforms } from '../comps/Platforms'
@@ -55,12 +56,12 @@ export default class GameScene extends Phaser.Scene {
     // DIMENSIONS
     this.gridUnit = 80
     this.sceneCenterX = this.cameras.main.centerX
-    this.ballX = 320
-    this.ballY = 160
-    this.hitPointY = 440
+    this.ballX = this.sceneCenterX
+    this.ballY = 280 // 160
+    this.hitPointY = 480 // 440
     // изменить калькуляцию!!!
-    this.baseDistanceY = 230
-    this.distanceY = this.baseDistanceY + 60
+    // this.baseDistanceY = 230
+    // this.distanceY = this.baseDistanceY + 60
     this.buttonY = 11.5 * this.gridUnit
 
     // STAKES & BALANCE
@@ -105,7 +106,8 @@ export default class GameScene extends Phaser.Scene {
       gray: 0xD9D9D9,
       wrapper: 0x212838,
       dark_red: 0x920000,
-      dark_gray: 0x3d3d3d
+      dark_gray: 0x262626, // 262626 0x3d3d3d
+
     };
 
     // text
@@ -124,8 +126,25 @@ export default class GameScene extends Phaser.Scene {
     this.labelColor = this.textColors.white
     this.labelFont = '14px AvenirBlack'
     this.duration = 500 // это не duration, а половина цикла
+
+  }
+  createVail() {
+    this.vail = this.add.graphics();
+
+    this.vail.__width = 640; // this.sceneCenterX * 2
+    this.vail.__height = 1120;
+    this.vail.__x = 0;
+    this.vail.__y = 0;
+    this.vail.__color = this.standartColors.black;
+
+    this.vail.fillStyle(this.vail.__color, 0.8);
+    this.vail.fillRect(this.vail.__x, this.vail.__y, this.vail.__width, this.vail.__height);
+    this.vail.setDepth(0)
+    // this.vail.setVisible(0)
   }
   create() {
+    // dev
+    // this.createVail()
     // this.game.events.on('blur', () => this.onAppBlur())
     // this.game.events.on('focus', () => this.onAppFocus())
 
@@ -174,10 +193,20 @@ export default class GameScene extends Phaser.Scene {
       .setScale(1)
       .setDepth(200)
 
+    this.header_ = this.add.text(320, 15, 'BONZA!', {
+      fontSize: '40px',
+      // color: index === 0 ? scene.textColors.red : scene.textColors.black,
+      color: this.textColors.red,
+      fontFamily: 'JapanRobot',
+    })
+      .setOrigin(0.5, 0)
+      .setDepth(100)
+
     this.createParticles() // эммитер передается в Ball
 
     this.countdownCounter = new CountdownCounter(this)
     this.moneyCounter = new MoneyCounter(this, this.initialDeposit)
+    this.modeLabel = new ModeLabel(this)
     // this.skull = new Skull(this)
     this.ball = new Ball(this, this.emitter,) // this.bounceHandler.bind(this)
     this.platforms = new Platforms(this)
@@ -210,7 +239,7 @@ export default class GameScene extends Phaser.Scene {
 
     if (!this.sounds) this.createSounds()
     setTimeout(() => {
-      this.sounds.jingle.play()
+      // this.sounds.jingle.play()
     }, 1000)
 
     this.fsm = new FSM()
@@ -316,7 +345,7 @@ export default class GameScene extends Phaser.Scene {
     this.setCashOutAllowed(false)
 
     this.hasCashOut = true
-    this.sounds.cashout.play()
+    // this.sounds.cashout.play()
     // если выход после 0, то нужно что-то менять...
     if (this.stakeValue <= 0) {
       // что-то странное
@@ -562,7 +591,6 @@ export default class GameScene extends Phaser.Scene {
     })
 
     this.time.addEvent({
-      // delay: this.duration * (this.platforms.hiddingCount + roundStartDelay),
       delay: roundStartDelay, // this.duration * roundStartDelay
       callback: () => {
         this.initCrashIndex() // хранить на сервере, запрашивать isCrash каждое касание (за 100 мс)
@@ -584,8 +612,8 @@ export default class GameScene extends Phaser.Scene {
         if (this.currentAutoSetting.rounds > 0 && !this.hasBet) {
           this.currentAutoSetting.rounds-- // слишком просто?
           // console.log('currentAutoSetting', this.currentAutoSetting.rounds)
-          if (this.currentAutoSetting.rounds === 0)
-            this.handleAutoSetting(this.currentAutoSetting)
+          // if (this.currentAutoSetting.rounds === 0)
+          this.handleAutoSetting(this.currentAutoSetting)
           this.handleBet()
         }
 
@@ -685,7 +713,7 @@ export default class GameScene extends Phaser.Scene {
         this.onBounce()
       })
       //
-      this.sounds.hit.play()
+      // this.sounds.hit.play()
     }
   }
   finish() {

@@ -45,13 +45,16 @@ export class AutoPanel {
     const { scene, container } = this
 
     // --- Фон
-    this.bg = scene.add
-      .image(0, 80, 'tuner_bg')
-      .setOrigin(0)
-      .setAlpha(1)
-      // .setScale(1.3)
-      // .setTint(0x000000)
-      .setInteractive()
+    // this.bg = scene.add
+    //   .image(0, 80, 'tuner_bg')
+    //   .setOrigin(0)
+    //   .setAlpha(0)
+    //   // .setScale(1.3)
+    //   // .setTint(0x000000)
+    //   .setInteractive()
+
+    // var 2
+    this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
 
     // --- Заголовок
     this.naming = scene.add

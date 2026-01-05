@@ -4,7 +4,7 @@ export class Background {
   constructor(scene) {
     this.scene = scene
     this.duration = scene.duration
-    this.startX = 320
+    this.startX = scene.sceneCenterX
     this.startY = 0
     this.scale = 1.0
     this.alpha = 0.0

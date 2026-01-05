@@ -48,11 +48,13 @@ export class RiskTunerPanel {
     const { scene, container } = this
 
     // --- Фон (теперь интерактивный, вместо старого vail)
-    this.bg = scene.add
-      .image(0, 0, 'tuner_bg')
-      .setOrigin(0)
-      .setAlpha(1)
-      .setInteractive()
+    // this.bg = scene.add
+    //   .image(0, 0, 'tuner_bg')
+    //   .setOrigin(0)
+    //   .setAlpha(0)
+    //   .setInteractive()
+
+    this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
 
     // --- Заголовок
     // this.naming = scene.add

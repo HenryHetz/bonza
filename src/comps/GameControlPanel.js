@@ -22,8 +22,14 @@ export class GameControlPanel {
     const buttonY = 11.5 * this.gridUnit
     const indent = this.scene.buttonIndent
     const nameSpacing = this.scene.buttonNameSpacing
+
+    const secondLineIndent = 120
+    const secondLineNameSpacing = 50
+
     const labelColor = this.scene.labelColor
     const labelFont = this.scene.labelFont
+
+    this.bg = this.scene.add.rectangle(this.centerX, buttonY, 600, 136, this.scene.standartColors.dark_gray, 0.99).setOrigin(0.5)
 
     // StakeCounter
     this.stakeCounterShadow = this.scene.add
@@ -115,8 +121,8 @@ export class GameControlPanel {
     this.buttonAuto = this.scene.add
       .image(indent, buttonY, 'button_auto_off')
       .setOrigin(0.5)
-      .setScale(0.8)
-      .setAlpha(0.01) // dev
+      .setScale(1)
+      .setAlpha(1.01) // dev
       .setInteractive()
       .on('pointerdown', () => this.onAuto?.())
 
@@ -128,11 +134,23 @@ export class GameControlPanel {
         font: labelFont
       })
       .setOrigin(0.5, 0)
-      .setAlpha(0)
+      .setAlpha(1)
+
+    this.autoCounter = this.scene.add
+      .text(this.buttonAuto.x, this.buttonAuto.y, '', {
+        fontFamily: 'AvenirBlack',
+        fontSize: '24px',
+        color: labelColor,
+        // font: labelFont,
+        // fontSize: '40px',
+      })
+      .setOrigin(0.5)
+      .setAlign('center')
+      .setAlpha(1)
 
     // Tuner Button
     this.buttonTuner = this.scene.add
-      .image(640 - 60, buttonY - 130, 'button_tuner')
+      .image(640 - 60, buttonY - secondLineIndent, 'button_tuner')
       .setOrigin(0.5)
       .setScale(1)
       .setAlpha(1) // dev
@@ -140,7 +158,7 @@ export class GameControlPanel {
       .on('pointerdown', () => this.onTuner?.())
 
     this.tunerLabel = this.scene.add
-      .text(this.buttonTuner.x, this.buttonTuner.y - 50, 'TUNER', {
+      .text(this.buttonTuner.x, this.buttonTuner.y - secondLineNameSpacing, 'TUNER', {
         // fontFamily: 'AvenirNextCondensedBold',
         // fontSize: '18px',
         // color: labelColor,
@@ -151,14 +169,14 @@ export class GameControlPanel {
 
     // Setting Button
     this.buttonSettings = this.scene.add
-      .image(60, buttonY - 130, 'button_settings')
+      .image(60, buttonY - secondLineIndent, 'button_settings')
       .setOrigin(0.5)
       .setScale(1)
       .setInteractive()
       .on('pointerdown', () => this.onSettings?.())
 
     this.settingsLabel = this.scene.add
-      .text(this.buttonSettings.x, this.buttonSettings.y - 50, 'SETTINGS', {
+      .text(this.buttonSettings.x, this.buttonSettings.y - secondLineNameSpacing, 'SETTINGS', {
         color: labelColor,
         font: labelFont
         // fontSize: '14px',
@@ -287,6 +305,7 @@ export class GameControlPanel {
   }
 
   updateStakeText(value) {
+    // console.log('updateStakeText', value.toFixed(2))
     if (typeof value === 'number' && !isNaN(value)) {
       this.stakeCounter.setText(value.toFixed(2))
       this.stakeCounterShadow.setText(value.toFixed(2))
@@ -302,8 +321,14 @@ export class GameControlPanel {
   }
 
   updateAutoButton(value) {
-    if (value) this.buttonAuto.setTexture('button_auto_on')
-    else this.buttonAuto.setTexture('button_auto_off')
+    if (value) {
+      this.buttonAuto.setTexture('button_auto_on')
+      this.autoCounter.setText(value.toFixed(0))
+    }
+    else {
+      this.buttonAuto.setTexture('button_auto_off')
+      this.autoCounter.setText('')
+    }
   }
 
   updateActionButton(color, alpha = 1) {

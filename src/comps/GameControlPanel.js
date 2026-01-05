@@ -29,7 +29,7 @@ export class GameControlPanel {
     const labelColor = this.scene.labelColor
     const labelFont = this.scene.labelFont
 
-    this.bg = this.scene.add.rectangle(this.centerX, buttonY, 600, 136, this.scene.standartColors.dark_gray, 0.99).setOrigin(0.5)
+    this.bg = this.scene.add.rectangle(this.centerX, buttonY, 600, 136, this.scene.standartColors.dark_gray, 0.0).setOrigin(0.5)
 
     // StakeCounter
     this.stakeCounterShadow = this.scene.add

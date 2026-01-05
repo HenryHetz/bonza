@@ -7,7 +7,7 @@ export class Background {
     this.startX = 320
     this.startY = 0
     this.scale = 1.0
-    this.alpha = 1.0
+    this.alpha = 0.0
 
     this.bg = scene.add
       .image(this.startX, this.startY, 'main_bg')

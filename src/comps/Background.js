@@ -1,4 +1,4 @@
-import { Scale } from 'phaser'
+
 
 export class Background {
   constructor(scene) {

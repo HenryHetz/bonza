@@ -14,6 +14,7 @@ import { CashoutChart } from '../comps/CashoutChart.js'
 import { BetValues } from '../comps/Bet/BetValues'
 import { BotManager } from '../comps/BotManager'
 import { RiskSettingNotice } from '../comps/RiskSettingNotice'
+import { BonzaMode } from '../comps/BonzaMode'
 import { CountdownCounter } from '../comps/CountdownCounter'
 import { MoneyCounter } from '../comps/MoneyCounter'
 import { ModeLabel } from '../comps/ModeLabel'
@@ -186,15 +187,15 @@ export default class GameScene extends Phaser.Scene {
     // this.ghost = new Ghost(this)
 
     // вынести в отдельный модуль и переключать на блок Х
-    this.header = this.add
-      .image(320, 0, 'header')
-      .setOrigin(0.5, 0)
-      .setAlpha(0)
-      .setScale(1)
-      .setDepth(200)
+    // this.header = this.add
+    //   .image(320, 0, 'header')
+    //   .setOrigin(0.5, 0)
+    //   .setAlpha(0)
+    //   .setScale(1)
+    //   .setDepth(200)
 
-    this.header_ = this.add.text(320, 15, 'BONZA!', {
-      fontSize: '40px',
+    this.header = this.add.text(320, 12, 'BONZA', {
+      fontSize: '50px',
       // color: index === 0 ? scene.textColors.red : scene.textColors.black,
       color: this.textColors.red,
       fontFamily: 'JapanRobot',
@@ -204,6 +205,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.createParticles() // эммитер передается в Ball
 
+    this.bonzaMode = new BonzaMode(this)
     this.countdownCounter = new CountdownCounter(this)
     this.moneyCounter = new MoneyCounter(this, this.initialDeposit)
     this.modeLabel = new ModeLabel(this)

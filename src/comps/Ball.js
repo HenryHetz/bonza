@@ -29,6 +29,21 @@ export class Ball {
       .setAlpha(0)
       .setDepth(this.depth)
 
+    // dev чтобы шар превращался в квадрат
+    // this.ball = scene.add.graphics().setDepth(this.depth).setAlpha(1)
+    // this.r = this.diameter / 2
+    // this.redraw()
+
+    // scene.tweens.add({
+    //   targets: this.r,
+    //   r: 0,
+    //   delay: 500,
+    //   duration: 1000,
+    //   ease: 'Linear',
+    //   onUpdate: () => this.redraw()
+    // });
+
+    this.isActive = false
     this.bounceTween = null
 
     this.createEvents()
@@ -113,6 +128,8 @@ export class Ball {
     if (data.mode === 'COUNTDOWN') {
     }
     if (data.mode === 'ROUND_PREPARE') {
+      this.ball.setFillStyle(this.scene.standartColors.red)
+      this.isActive = true
       this.reset()
     }
     if (data.mode === 'START') {
@@ -129,6 +146,15 @@ export class Ball {
     if (data.mode === 'FINISH') {
       this.stop()
     }
+    if (data.mode === 'CASHOUT') {
+      this.cashoutHandler(data)
+    }
+  }
+  cashoutHandler(data) {
+    // console.log('cashoutHandler', data)
+    // this.stopTween() - надо иначе
+    this.isActive = false
+    this.ball.setFillStyle(this.scene.standartColors.dark_gray) // white
   }
   reset() {
     // this.clearTint()
@@ -268,6 +294,7 @@ export class Ball {
   }
   fall(callback) {
     this.stopTween()
+    // if (!this.isActive) return
     // this.trail.start();
     // console.log('ball fall start', this.scene.elapsedSec.toFixed(2))
 
@@ -382,5 +409,21 @@ export class Ball {
 
   getY() {
     return this.ball.y
+  }
+
+  redraw() {
+    const w = this.diameter;
+    const h = this.diameter;
+
+    this.ball.clear();
+    this.ball.fillStyle(this.color, 1);
+
+    // если ваша позиция - центр:
+    const x = this.x - w / 2;
+    const y = this.y - h / 2;
+
+    this.ball.fillRoundedRect(this.x - this.diameter / 2, this.y - this.diameter, w, h, this.r);
+
+    console.log('ball', this.x, this.y, this.ball)
   }
 }

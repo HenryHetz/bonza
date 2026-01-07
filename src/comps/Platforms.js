@@ -1,4 +1,4 @@
-import { Scale } from "phaser"
+
 
 export class Platforms {
     constructor(scene) {
@@ -297,7 +297,7 @@ export class Platforms {
 
         // this.buildAvatarFrames(patternObj)
 
-        let bonus = 0
+        // let bonus = 0
         let y = 0
         for (let i = 0; i < patternObj.blocks; i++) {
             const h = patternObj.heightsPx[i]
@@ -310,22 +310,22 @@ export class Platforms {
             // это нужно проверять из сцены, и вообще должно приходить от сервера
             // но для простоты пусть будет тут
             // все блоки с паттерном — бонус!
-            if (block.__bonus) {
-                bonus += 1
-            }
+            // if (block.__bonus) {
+            //     bonus += 1
+            // }
         }
-        if (bonus === patternObj.blocks) {
-            // это нужно проверять из сцены, и вообще должно приходить от сервера
-            // но для простоты пусть будет тут
-            // все блоки с паттерном — бонус!
-            const hasCashOut = this.scene.hasCashout
-            if (!hasCashOut) {
-                // this.scene.sounds.jingle.play()
-                console.log('BONUS achieved! All patterns visible!')
-            } else {
-                console.log('BONUS skipped due to cashout')
-            }
-        }
+        // if (bonus === patternObj.blocks) {
+        //     // это нужно проверять из сцены, и вообще должно приходить от сервера
+        //     // но для простоты пусть будет тут
+        //     // все блоки с паттерном — бонус!
+        //     const hasCashOut = this.scene.hasCashout
+        //     if (!hasCashOut) {
+        //         // this.scene.sounds.jingle.play()
+        //         console.log('BONUS achieved! All patterns visible!')
+        //     } else {
+        //         console.log('BONUS skipped due to cashout')
+        //     }
+        // }
         // if (bonus > 0) this.scene.sounds.puck.play({})
 
         if (immediate) {
@@ -520,7 +520,8 @@ export class Platforms {
         const patternIndent = 0
         let pattern = null
 
-        // isBonus = false // dev
+        // isBonus = true // dev
+
         const stampScale = heightPx / 80 // размер печати
         const stampIndent = isWhite ? -140 : 140
 
@@ -793,7 +794,11 @@ export class Platforms {
         }
 
         if (left === 0) {
-            console.log('bonus')
+            console.log('bonus', count)
+            // пробно выводим информацию на экран
+            // если мы не вышли?
+            // this.scene.bonzaMode.set(count)
+            this.scene.events.emit('gameEvent', { mode: 'BONZA' })
         }
     }
 

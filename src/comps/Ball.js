@@ -129,6 +129,7 @@ export class Ball {
     }
     if (data.mode === 'ROUND_PREPARE') {
       this.ball.setFillStyle(this.scene.standartColors.red)
+      // this.ball.alpha = 1
       this.isActive = true
       this.reset()
     }
@@ -154,7 +155,8 @@ export class Ball {
     // console.log('cashoutHandler', data)
     // this.stopTween() - надо иначе
     this.isActive = false
-    this.ball.setFillStyle(this.scene.standartColors.dark_gray) // white
+    // this.ball.setFillStyle(this.scene.standartColors.dark_gray) // white
+    // this.ball.alpha = 0
   }
   reset() {
     // this.clearTint()

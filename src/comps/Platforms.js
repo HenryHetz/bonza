@@ -38,9 +38,11 @@ export class Platforms {
         this.compiledMap = this.compileBlockMap(this.blockMap)
 
         this.initBonusSceme()
+        // dev
+        this.tokenProbabilities = 0.2
     }
     initBonusSceme() {
-        this.patternProbabilities = 0.25 // 0.25 норм
+        this.patternProbabilities = 0.5 // 0.25 норм
         return
         // dev
         const HE = this.scene.houseEdge
@@ -149,7 +151,7 @@ export class Platforms {
             this.lastKnownMulty = data.multiplier
             this.nextMulty = data.nextMultiplier
             this.chessPhase ^= 1
-            this.onBounce(data)
+            this.onHit(data)
             // dev
             // this.scene.countdownCounter.set(data.count + 1)
             // this.scene.countdownCounter.show(1)
@@ -223,11 +225,11 @@ export class Platforms {
         this.lastBlock.update()
     }
 
-    onBounce(data) {
+    onHit(data) {
         if (!this.blocks.length) return
-        // console.log(data.count, 'onBounce:', data)
+        // console.log(data.count, 'onHit:', data)
         const top = this.blocks[0]
-        const removedH = top.__height
+        const removedH = top.__height * data.amount
 
         // 1) выбиваем верхний
         this.scene.tweens.add({
@@ -250,7 +252,10 @@ export class Platforms {
         })
 
         // 2) удаляем из массива
-        this.blocks.shift()
+        for (let index = 0; index < data.amount; index++) {
+            this.blocks.shift()
+        }
+
 
         const easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 1) // 0.7
         let patternSwitched = false
@@ -397,13 +402,16 @@ export class Platforms {
         if (stepLeft <= 0) return 1
 
         let amount = 5
-        if (this.lastKnownMulty >= 2) amount = 4
-        if (this.lastKnownMulty >= 10) amount = 3
-        if (this.lastKnownMulty >= 100) amount = 2
 
-        // ближайшее меньшее (или равное) из 6-4-3-2-1
-        const STEPS = [5, 4, 3, 2, 1]
-        amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
+        if (!this.scene.bonzaCount > 0) { // а если мы подходим к концу???
+            if (this.lastKnownMulty >= 2) amount = 4
+            if (this.lastKnownMulty >= 10) amount = 3
+            if (this.lastKnownMulty >= 100) amount = 2
+
+            // ближайшее меньшее (или равное) из 6-4-3-2-1
+            const STEPS = [5, 4, 3, 2, 1]
+            amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
+        }
 
         return amount
     }
@@ -521,6 +529,7 @@ export class Platforms {
         let pattern = null
 
         // isBonus = true // dev
+        if (blocksCount === 1) isBonus = false
 
         const stampScale = heightPx / 80 // размер печати
         const stampIndent = isWhite ? -140 : 140
@@ -550,10 +559,30 @@ export class Platforms {
                 0x000000,
             ).setOrigin(0.5).setAlpha(0)
         }
+        // ещё + и - для монет!
+        // Phaser.Math.Between(0, 100)
+
+        let sign = Phaser.Math.Between(0, 1) ? '+' : '-'
+        const tokenRandom = Phaser.Math.FloatBetween(0, 1)
+        let isToken = tokenRandom < this.tokenProbabilities
+        isToken = false // dev
+
+        const token = scene.add
+            .text(70, heightPx * 0.5, sign, {
+                // color: index === 0 ? scene.textColors.red : scene.textColors.black,
+                color: scene.textColors.red,
+                fontFamily: 'JapanRobot',
+                fontSize: '40px',
+                // fontFamily: 'JapanRobot',
+                // fontSize: '24px',
+                // fill: scene.textColors.black,
+            })
+            .setOrigin(0.5, 0.5)
+            .setAlpha(isToken)
 
         const frame = this.createBlockFrame(this.blockWidth, heightPx, this.scene.standartColors.dark_gray)
 
-        block.add([back, rect, frame, pattern, text])
+        block.add([back, rect, frame, pattern, text, token])
         // block.setMask(mask);
         // block.__bonus = true // dev
         block.__rect = rect
@@ -798,7 +827,10 @@ export class Platforms {
             // пробно выводим информацию на экран
             // если мы не вышли?
             // this.scene.bonzaMode.set(count)
+
+            // УБРАТЬ ОТСЮДА!!! 
             this.scene.events.emit('gameEvent', { mode: 'BONZA' })
+            this.scene.bonzaCount += count
         }
     }
 

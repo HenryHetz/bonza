@@ -246,7 +246,7 @@ export class Ball {
   fallHandler(load) {
     // console.log('fallHandler', load.mode, load.depth)
     if (load.mode === 'common') this.fall()
-    if (load.mode === 'bonza') this.rush(load.depth)
+    if (load.mode === 'bonza') this.rush(load.amount)
   }
   rush(amount) {
     this.stopTween()
@@ -257,7 +257,7 @@ export class Ball {
       this.scene.tweens.add({
         targets: this.ball,
         y: this.hitPointY,
-        duration: this.duration - (amount * 60), // this.duration / 2
+        duration: 200, // this.duration / 2
         //   yoyo: true,
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
@@ -270,19 +270,21 @@ export class Ball {
           // }
         },
         onComplete: () => {
+          // this.shake()
+
           for (let index = 1; index <= amount; index++) {
             // пробиваем
-            const y = this.hitPointY + index * 40
+            const y = this.hitPointY + index * (180 / 5)
             this.scene.tweens.add({
               targets: this.ball,
               y: y,
-              delay: 50 * index,
-              duration: 10,
+              delay: 400 * index,
+              duration: 100,
               ease: 'Back.easeIn', // 'Sine.easeIn'
               onComplete: () => {
                 // this.trail.stop();
-                this.scene.cameras.main.shake(50, 0.005)
-                this.trail.render(this.ball.y);
+                this.shake()
+
               },
             })
           }
@@ -290,6 +292,10 @@ export class Ball {
           // this.trail.stop();
         },
       })
+  }
+  shake() {
+    this.scene.cameras.main.shake(50, 0.005)
+    this.trail.render(this.ball.y);
   }
   drawShadow(y, progress) {
     // console.log('drawShadow', y, progress)

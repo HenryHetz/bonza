@@ -7,6 +7,7 @@ export class ButtonGraphics extends Phaser.GameObjects.Graphics {
     const width = 240
     const height = 100
     const skew = 8
+
     const fillColor = this.colorStringToHex(color)
     // const fillColor = color
     const strokeColor = 'black'
@@ -15,6 +16,7 @@ export class ButtonGraphics extends Phaser.GameObjects.Graphics {
     this.width = width
     this.height = height
     this.skew = skew
+    this.slash = 0
 
     // Рисуем кнопку
     this.lineStyle(strokeWidth, strokeColor, 1)
@@ -22,7 +24,7 @@ export class ButtonGraphics extends Phaser.GameObjects.Graphics {
 
     this.beginPath()
     this.moveTo(-width / 2 + skew, -height / 2)
-    this.lineTo(width / 2 - skew, -height / 2 - 5)
+    this.lineTo(width / 2 - skew, -height / 2 - this.slash)
     this.lineTo(width / 2, height / 2)
     this.lineTo(-width / 2, height / 2)
     this.closePath()
@@ -57,7 +59,7 @@ export class ButtonGraphics extends Phaser.GameObjects.Graphics {
 
     this.beginPath()
     this.moveTo(-this.width / 2 + this.skew, -this.height / 2)
-    this.lineTo(this.width / 2 - this.skew, -this.height / 2 - 5)
+    this.lineTo(this.width / 2 - this.skew, -this.height / 2 - this.slash)
     this.lineTo(this.width / 2, this.height / 2)
     this.lineTo(-this.width / 2, this.height / 2)
     this.closePath()

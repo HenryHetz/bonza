@@ -43,7 +43,7 @@ export class GameControlPanel {
       .setOrigin(0.5)
 
     this.stakeCounter = this.scene.add
-      .text(this.centerX, buttonY - 1.5 * this.gridUnit, '', {
+      .text(this.centerX, buttonY - secondLineIndent, '', {
         fontFamily: 'JapanRobot',
         fontSize: '40px',
         fill: this.scene.textColors.white,

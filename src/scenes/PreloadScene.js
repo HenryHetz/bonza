@@ -85,6 +85,21 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('avatar', 'assets/sprites/bonus/avatar_2.jpg')
     this.load.image('stamp', 'assets/sprites/bonus/stamp.png')
 
+    // emo
+    this.load.image('emo_help', 'assets/sprites/emo_chat/help.png')
+    this.load.image('emo_plane', 'assets/sprites/emo_chat/plane.png')
+    this.load.spritesheet('emo', 'assets/sprites/emo_chat/emoji.png', {
+      frameWidth: 72,     // ширина одной иконки
+      frameHeight: 72,    // высота одной иконки
+      margin: 0,          // отступ от краёв спрайта (если есть)
+      spacing: 0          // промежуток между иконками (если есть)
+    });
+    this.load.spritesheet('words', 'assets/sprites/emo_chat/emoji.png', {
+      frameWidth: 144,     // ширина одной иконки
+      frameHeight: 72,    // высота одной иконки
+      margin: 0,          // отступ от краёв спрайта (если есть)
+      spacing: 0          // промежуток между иконками (если есть)
+    });
     // атласы
     this.load.atlas(
       'smileys',

@@ -12,7 +12,7 @@ import { AutoPanel } from '../comps/Auto/AutoPanel'
 
 import { CashoutChart } from '../comps/CashoutChart.js'
 import { BetValues } from '../comps/Bet/BetValues'
-import { BotManager } from '../comps/BotManager'
+
 import { RiskSettingNotice } from '../comps/RiskSettingNotice'
 import { BonzaMode } from '../comps/BonzaMode'
 import { CountdownCounter } from '../comps/CountdownCounter'
@@ -25,6 +25,7 @@ import { FSM } from '../comps/FSM'
 import { GameControlPanel } from '../comps/GameControlPanel'
 // import { on } from 'ws'
 
+// import EmoChat from '../comps//EmoChat.js';
 import { DevUI } from '../comps/DevUI'
 // import { LiveOpsManager } from '../liveOps/LiveOpsManager'
 import { Ghost } from '../comps/Ghost'
@@ -36,11 +37,12 @@ export default class GameScene extends Phaser.Scene {
   }
   preload() { }
   init() {
+    this.bonzaCount = 0 // dev
     this.paused = true;
     // dev - prod
     this.isDev = true
     this.timeScale = 0.5
-    // this.timeScale = -0.4 // dev
+    // this.timeScale = -0.3 // dev
     this.setTimeScale()
     //this.time.timeScale = this.timeScale
 
@@ -180,9 +182,9 @@ export default class GameScene extends Phaser.Scene {
     //   repeat: -1,
     // })
 
-    // this.devUI = new DevUI(this)
+    this.devUI = new DevUI(this)
     // this.cashoutChart = new CashoutChart(this)
-    // this.botManager = new BotManager(this, this.betValues) - old?
+
     // this.liveOps = new LiveOpsManager(this) // нужно изучить
     // this.ghost = new Ghost(this)
 
@@ -251,6 +253,10 @@ export default class GameScene extends Phaser.Scene {
 
     this.handleRiskSettings(this.currentRiskSetting)
 
+    // dev
+    setTimeout(() => {
+      // this.emoChat = new EmoChat(this)
+    }, 1000);
     // dev
     const cameraOpts = {
       x: 290,
@@ -634,48 +640,40 @@ export default class GameScene extends Phaser.Scene {
       hasBet: this.hasBet,
     })
 
-    this.time.delayedCall(this.duration, () => {
-      this.onHit()
-    })
+    this.fallStarter()
+  }
+  fallStarter() {
+    let mode = 'common'
+    let duration = this.duration
+    let amount = 1
 
-    const bonza = this.crashIndex === 0 ? false : true
-    let depth = this.rnd.between(1, 5)
-    if (depth > this.crashIndex) depth = this.crashIndex
+    console.log('this.bonzaCount', this.bonzaCount)
+
+    if (this.bonzaCount > 0) {
+      mode = 'bonza' // mode: bonza ? 'bonza' : 'common', // dev
+      const bonza = this.crashIndex === 0 ? false : true
+      amount = this.rnd.between(2, 5) // нужно брать по весу, больше больших
+
+      if (amount > this.crashIndex) amount = this.crashIndex
+      // amount = 5 // dev
+      duration = 200 + amount * 400 + 200
+      // duration = 3000
+    }
 
     this.events.emit('gameEvent', {
       mode: 'FALL',
       load: {
-        // mode: bonza ? 'bonza' : 'common', // dev
-        mode: 'common',
-        depth: depth,
-      }
-    })
-  }
-  // onHit() {
-  //   console.log('onHit',)
-  //   // проверяем условия касания ?
-
-  //   this.time.delayedCall(this.duration, () => {
-  //     this.onBounce()
-  //   })
-  // }
-  onBounce() {
-    // console.log('onBounce', this.paused)
-    if (this.paused) return
-    // запросы на сервер? Что здесь?
-    this.events.emit('gameEvent', {
-      mode: 'FALL',
-      load: {
-        mode: 'common', // 
-
+        mode: mode,
+        amount: amount,
+        duration: duration
       }
     })
 
-    this.time.delayedCall(this.duration, () => {
-      this.onHit()
+    this.time.delayedCall(duration, () => {
+      this.onHit(amount)
     })
   }
-  onHit() {
+  onHit(amount) {
     // console.log('scene hit', this.elapsedSec)
     this.checkCrash(this.bounceCount)
     // ещё надо чекать последнюю платформу
@@ -694,6 +692,7 @@ export default class GameScene extends Phaser.Scene {
         nextMultiplier,
         stakeValue: this.stakeValue,
         hasBet: this.hasBet,
+        amount: amount,
       })
 
       if (this.bounceCount === 0 && !this.cashOutAllowed)
@@ -701,7 +700,8 @@ export default class GameScene extends Phaser.Scene {
 
       if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
 
-      this.bounceCount++
+      this.bounceCount += amount
+      if (this.bonzaCount > 0) this.bonzaCount--
 
       // если нет продолжения нужно делать фейрверк
 
@@ -717,6 +717,28 @@ export default class GameScene extends Phaser.Scene {
       //
       // this.sounds.hit.play()
     }
+  }
+  onBounce() {
+    // console.log('onBounce', this.paused)
+    if (this.paused) return
+    // запросы на сервер? Что здесь?
+    let delayBeforeFall = 0
+    if (this.bonzaCount > 0) delayBeforeFall = 1000
+    this.time.delayedCall(delayBeforeFall, () => {
+      this.fallStarter()
+    })
+
+    // this.events.emit('gameEvent', {
+    //   mode: 'FALL',
+    //   load: {
+    //     mode: 'common', // bonza common
+
+    //   }
+    // })
+
+    // this.time.delayedCall(this.duration, () => {
+    //   this.onHit()
+    // })
   }
   finish() {
     // console.log('this.cashOutAllowed', this.cashOutAllowed)

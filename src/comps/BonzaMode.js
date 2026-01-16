@@ -6,7 +6,7 @@ export class BonzaMode {
 
     this.amount = 0
 
-    this.logo = scene.add.image(this.x, this.y, 'stamp').setScale(1.2).setAlpha(0)
+    this.logo = scene.add.image(this.x, this.y, 'stamp').setScale(1.2).setAlpha(0.2)
 
     this.counter = scene.add
       .text(this.x + 40, this.y - 40, this.amount, {

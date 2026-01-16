@@ -270,7 +270,8 @@ export class Ball {
           // }
         },
         onComplete: () => {
-          // this.shake()
+          this.shake()
+
 
           for (let index = 1; index <= amount; index++) {
             // пробиваем
@@ -278,12 +279,15 @@ export class Ball {
             this.scene.tweens.add({
               targets: this.ball,
               y: y,
-              delay: 400 * index,
+              delay: 200 * (index - 1),
               duration: 100,
-              ease: 'Back.easeIn', // 'Sine.easeIn'
+              ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
               onComplete: () => {
+                this.trail.render(this.ball.y);
                 // this.trail.stop();
-                this.shake()
+                // this.shake()
+                // dev
+                this.scene.platforms.removeBlock()
 
               },
             })
@@ -294,7 +298,7 @@ export class Ball {
       })
   }
   shake() {
-    this.scene.cameras.main.shake(50, 0.005)
+    this.scene.cameras.main.shake(10, 0.005)
     this.trail.render(this.ball.y);
   }
   drawShadow(y, progress) {

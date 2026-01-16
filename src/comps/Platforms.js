@@ -224,7 +224,12 @@ export class Platforms {
         this.applyPattern(start, { immediate: true })
         this.lastBlock.update()
     }
-
+    removeBlock() {
+        if (!this.blocks.length) return
+        const top = this.blocks[0]
+        top.destroy()
+        this.blocks.shift()
+    }
     onHit(data) {
         if (!this.blocks.length) return
         // console.log(data.count, 'onHit:', data)
@@ -252,9 +257,11 @@ export class Platforms {
         })
 
         // 2) удаляем из массива
-        for (let index = 0; index < data.amount; index++) {
-            this.blocks.shift()
-        }
+        // for (let index = 0; index < data.amount; index++) {
+        //     this.blocks.shift()
+        // }
+
+        this.blocks.shift()
 
 
         const easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 1) // 0.7

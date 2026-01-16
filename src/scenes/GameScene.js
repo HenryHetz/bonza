@@ -37,7 +37,7 @@ export default class GameScene extends Phaser.Scene {
   }
   preload() { }
   init() {
-    this.bonzaCount = 0 // dev
+    this.bonzaCount = 5 // dev
     this.paused = true;
     // dev - prod
     this.isDev = true

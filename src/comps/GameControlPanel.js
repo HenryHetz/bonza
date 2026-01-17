@@ -63,9 +63,10 @@ export class GameControlPanel {
       .setOrigin(0.5, 0).setAlign('center')
 
     this.autoCashoutLabel = this.scene.add
-      .text(this.stakeCounter.x, this.stakeCounter.y + 40, 'AUTO CASH: 2.11', {
+      .text(this.stakeCounter.x, this.stakeCounter.y + 40, '', {
         font: labelFont,
-        color: labelColor,
+        // color: labelColor,
+        color: this.scene.textColors.red
       })
       .setOrigin(0.5)
       .setAlign('center')
@@ -135,6 +136,16 @@ export class GameControlPanel {
       })
       .setOrigin(0.5, 0)
       .setAlpha(1)
+
+    // this.emoLabel = this.scene.add
+    //   .text(640 - indent, buttonY - nameSpacing, 'EMO_CHAT', {
+    //     // fontFamily: 'AvenirNextCondensedBold',
+    //     // fontSize: '18px',
+    //     color: labelColor,
+    //     font: labelFont
+    //   })
+    //   .setOrigin(0.5, 0)
+    //   .setAlpha(1)
 
     this.autoCounter = this.scene.add
       .text(this.buttonAuto.x, this.buttonAuto.y, '', {

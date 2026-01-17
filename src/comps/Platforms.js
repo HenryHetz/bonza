@@ -36,6 +36,7 @@ export class Platforms {
             { pattern: [1, 1, 1, 1] },
             { pattern: [1, 1, 1, 1, 1] },
             { pattern: [1, 1, 1, 1, 1, 1] },
+            // { pattern: [1, 1, 1, 1, 1, 1, 1, 1] },
         ]
         this.compiledMap = this.compileBlockMap(this.blockMap)
 
@@ -44,7 +45,7 @@ export class Platforms {
         this.tokenProbabilities = 0.2
     }
     initBonusSceme() {
-        this.patternProbabilities = this.scene.bonzaProbabilities // 0.25 норм
+        this.bonzaProbabilities = this.scene.bonzaProbabilities // 0.25 норм
         return
         // dev
         const HE = this.scene.houseEdge
@@ -58,7 +59,7 @@ export class Platforms {
         }
 
         const ev = (p) => {
-            // const p = this.patternProbabilities
+            // const p = this.bonzaProbabilities
             // return (50 * Math.pow(p, 6) + 40 * Math.pow(p, 4) + 9 * Math.pow(p, 3) + 1 * Math.pow(p, 2)) / 100
             return (
                 zones.lt2 * p ** 6 +
@@ -67,8 +68,8 @@ export class Platforms {
                 zones.gte100 * p ** 2
             )
         }
-        // console.log('Platforms patternProbabilities expected visible blocks:',
-        // ev(this.patternProbabilities).toFixed(4), (1 / ev(this.patternProbabilities)).toFixed(0))
+        // console.log('Platforms bonzaProbabilities expected visible blocks:',
+        // ev(this.bonzaProbabilities).toFixed(4), (1 / ev(this.bonzaProbabilities)).toFixed(0))
     }
     create() {
         // this.createAssets()
@@ -565,7 +566,7 @@ export class Platforms {
             .setOrigin(0.5, 0.5)
 
         const patternRandom = Phaser.Math.FloatBetween(0, 1)
-        let isBonus = patternRandom < this.patternProbabilities
+        let isBonus = patternRandom < this.bonzaProbabilities
         const patternIndent = 0
         let pattern = null
 

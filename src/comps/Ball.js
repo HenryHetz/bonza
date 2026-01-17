@@ -12,6 +12,10 @@ export class Ball {
     this.fujiY = 320 + this.diameter / 2
 
     this.easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 0.5) // 0.7
+    this.easeBackIn = (v) => Phaser.Math.Easing.Back.In(v, 0.4) // 0.7
+    this.easeNewOut = (v) => Phaser.Math.Easing.Quadratic.Out(v, 0.9) // 0.7 
+    this.easeNewIn = (v) => Phaser.Math.Easing.Quadratic.In(v, 0.9) // 0.7
+    // Sine Quintic
 
     this.duration = scene.duration
     this.emitter = emitter
@@ -248,7 +252,7 @@ export class Ball {
   fallHandler(load) {
     // console.log('fallHandler', load.mode, load.depth)
     if (load.mode === 'usu') this.fall()
-    if (load.mode === 'bonza') this.rush(load.amount)
+    if (load.mode === 'bonza') this.rush(load)
   }
   bonza(amount) {
     this.stopTween()
@@ -267,16 +271,16 @@ export class Ball {
     })
 
   }
-  rush(amount) {
+  rush(load) {
     this.stopTween()
 
-    this.trail.start();
+    // this.trail.start();
 
     this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
         y: this.hitPointY,
-        duration: 200, // this.duration / 2
+        duration: load.fallTime, // this.duration / 2
         //   yoyo: true,
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
@@ -288,14 +292,14 @@ export class Ball {
           this.shake()
           // this.scene.platforms.removeBlock()
 
-          for (let index = 1; index <= amount; index++) {
+          for (let index = 1; index <= load.amount; index++) {
             // пробиваем
             const y = this.hitPointY + index * (180 / 5)
             this.scene.tweens.add({
               targets: this.ball,
               y: y,
-              delay: 100 * (index - 1),
-              duration: 100,
+              delay: load.drillTime * (index - 1),
+              duration: load.drillTime, // this.duration / 2
               ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
               onComplete: () => {
                 this.trail.render(this.ball.y);
@@ -372,10 +376,10 @@ export class Ball {
     let ease = 'Quad.easeOut'
     if (data.isBonza) {
       // delay = 50
-      duration = 200
-      ease = this.easeBackInOut
+      duration = 200 // надо передавать из сцены
+      ease = this.easeBackIn
     }
-    this.bouncing =
+    this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
         y: this.y,
@@ -383,7 +387,20 @@ export class Ball {
         duration: duration, // this.duration
         ease: ease, // Quart
         onComplete: () => {
-          // if (callback) callback()
+          if (data.isBonza) {
+            // немного подлетим
+            this.scene.tweens.add({
+              targets: this.ball,
+              y: this.y - 100,
+              // delay: delay,
+              duration: 750, // this.duration
+              yoyo: true,
+              ease: this.easeNewOut, // Quad Quart
+              onComplete: () => {
+                // this.ball.y = this.y
+              },
+            })
+          }
         },
       })
   }

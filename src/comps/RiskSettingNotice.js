@@ -2,17 +2,38 @@ export class RiskSettingNotice {
   constructor(scene) {
     this.scene = scene
     this.x = this.scene.sceneCenterX
-    this.y = 9 * this.scene.gridUnit + 20
+    this.y = 70 // 730
+
+    // this.label = scene.add
+    //   .text(this.x, this.y, 'New settings:', {
+    //     font: this.scene.labelFont,
+    //     // color: labelColor,
+    //     color: this.scene.textColors.red
+    //   })
+    //   .setOrigin(0.5, 0)
+    //   .setAlign('center')
+    //   .setAlpha(0)
 
     this.label = scene.add
-      .text(this.x, this.y, '', {
-        fontSize: '18px',
-        color: '#FDD41D',
-        fontFamily: 'AvenirNextCondensedBold',
+      .text(this.x, this.y, 'New settings:', {
+        font: this.scene.labelFont,
+        // color: labelColor,
+        color: this.scene.textColors.red
       })
       .setOrigin(0.5, 0)
       .setAlign('center')
       .setAlpha(0)
+
+    // this.autoCashoutLabel = this.scene.add
+    //   .text(this.stakeCounter.x, this.stakeCounter.y + 40, '', {
+    //     font: labelFont,
+    //     // color: labelColor,
+    //     color: this.scene.textColors.red
+    //   })
+    //   .setOrigin(0.5)
+    //   .setAlign('center')
+    //   .setAlpha(0)
+
 
     this.createEvents()
   }
@@ -23,7 +44,7 @@ export class RiskSettingNotice {
         this.handleEvent(data)
       }
       if (data.mode === 'RISK_SETTING_PENDING') {
-        this.set('New settings in the next round...')
+        this.set('NEW SET NEXT ROUND...')
         this.show(true)
       }
     })

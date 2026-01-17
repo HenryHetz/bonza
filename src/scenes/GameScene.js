@@ -25,7 +25,7 @@ import { FSM } from '../comps/FSM'
 import { GameControlPanel } from '../comps/GameControlPanel'
 // import { on } from 'ws'
 
-// import EmoChat from '../comps//EmoChat.js';
+import EmoChat from '../comps//EmoChat.js';
 import { DevUI } from '../comps/DevUI'
 // import { LiveOpsManager } from '../liveOps/LiveOpsManager'
 import { Ghost } from '../comps/Ghost'
@@ -38,11 +38,14 @@ export default class GameScene extends Phaser.Scene {
   preload() { }
   init() {
     this.bonzaCount = 0 // dev
+    this.isBonza = this.bonzaCount > 0
+
     this.pendingBonzaAmount = 0
     this.bonusCount = 0
     this.bonusCountAmount = 0
 
-    this.bonzaProbabilities = 0.25
+    this.bonzaProbabilities = 0.35 // 0.25 / dev -> server
+    this.minBonzaRandom = 0.5 // для RNG - min X >=2 ?
 
     this.paused = true;
     // dev - prod
@@ -251,7 +254,7 @@ export default class GameScene extends Phaser.Scene {
 
     // dev
     setTimeout(() => {
-      // this.emoChat = new EmoChat(this)
+      this.emoChat = new EmoChat(this)
     }, 1000);
 
     // dev
@@ -429,6 +432,7 @@ export default class GameScene extends Phaser.Scene {
 
           this.bonusCountAmount += data.amount
           console.log('new bonza', this.bonzaCount, this.pendingBonzaAmount)
+          this.sounds.jingle.play()
         }
 
       }
@@ -665,6 +669,9 @@ export default class GameScene extends Phaser.Scene {
     let duration = this.duration
     let amount = 1
 
+    const fallTime = 200
+    const drillTime = 100
+
     // console.log('this.bonzaCount', this.bonzaCount)
 
     if (this.bonzaCount > 0) {
@@ -674,7 +681,7 @@ export default class GameScene extends Phaser.Scene {
 
       if (amount > this.crashIndex) amount = this.crashIndex
       // amount = 5 // dev
-      duration = 200 + amount * 100 + 100
+      duration = fallTime + amount * drillTime + 100
       // duration = 3000
     }
 
@@ -688,7 +695,9 @@ export default class GameScene extends Phaser.Scene {
       load: {
         mode: mode,
         amount: amount,
-        duration: duration
+        duration: duration,
+        fallTime,
+        drillTime,
       }
 
     })
@@ -1047,7 +1056,7 @@ export default class GameScene extends Phaser.Scene {
   initCrashIndex_local() { // old
     let random = Math.random()
     // random = 0.999999999 // dev 
-    if (this.bonzaCount > 0) random = Phaser.Math.FloatBetween(0.5, 1) // bonza
+    if (this.bonzaCount > 0) random = Phaser.Math.FloatBetween(this.minBonzaRandom, 1) // bonza
 
     console.log('random', random)
 

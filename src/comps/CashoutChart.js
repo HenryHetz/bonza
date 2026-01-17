@@ -9,8 +9,8 @@ export class CashoutChart {
     this.simulateServer()
   }
   init() {
-    this.x = 450
-    this.y = 240
+    this.x = 10
+    this.y = 360
     this.maxRows = 10
     this.entries = []
     this.containers = []
@@ -23,7 +23,7 @@ export class CashoutChart {
     this.bgImage = this.scene.add
       .image(this.x, this.y - 60, 'co')
       .setOrigin(0)
-      .setAlpha(1)
+      .setAlpha(0)
       .setInteractive()
 
     this.bgImage.on('pointerdown', (pointer) => {
@@ -97,9 +97,9 @@ export class CashoutChart {
 
     const stepsArr = [10, 20, 25, 50, 100, 100, 100, 100]
     const minArr = [
-      1.01, 1.01, 1.01, 1.1, 1.2, 1.3, 1.4, 1.5, 2.0, 2.5, 1.1, 1.2,
+      1.01, 1.01, 1.01, 1.1, 1.2, 1.3, 1.4, 1.5, 2.0, 1.5, 1.1, 1.2,
     ]
-    const maxArr = [1000, 1000, 1000, 10000, 20000, 50000, 100000, 1000000]
+    const maxArr = [1000, 1000, 1000, 10000, 20000, 50000, 100000, 100000]
     return {
       steps: Phaser.Utils.Array.GetRandom(stepsArr),
       minPayout: Phaser.Utils.Array.GetRandom(minArr),

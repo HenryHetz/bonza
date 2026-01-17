@@ -37,13 +37,24 @@ export default class GameScene extends Phaser.Scene {
   }
   preload() { }
   init() {
-    this.bonzaCount = 5 // dev
+    this.bonzaCount = 0 // dev
+    this.pendingBonzaAmount = 0
+    this.bonusCount = 0
+    this.bonusCountAmount = 0
+
+    this.bonzaProbabilities = 0.25
+
     this.paused = true;
     // dev - prod
     this.isDev = true
-    this.timeScale = 0.5
-    // this.timeScale = -0.3 // dev
-    this.setTimeScale()
+    this.timeScale = 1
+    // this.timeScale = -0.4 // dev
+    this.gameSpeed = DEFAULT_GAME_CONFIG.gameSpeed
+    if (this.gameSpeed > this.timeScale) {
+      let value = this.gameSpeed - 1
+      this.setTimeScale(value)
+    }
+    // this.setTimeScale()
     //this.time.timeScale = this.timeScale
 
     this.houseEdge = 5.00 // его не должно быть в локале!
@@ -52,7 +63,7 @@ export default class GameScene extends Phaser.Scene {
     this.isCrashed = false
     this.roundCounter = 0
     this.bounceCount = 0
-    this.quickMode = DEFAULT_GAME_CONFIG.quickMode // это должно ускорять анимации
+    this.quickMode = false
     this.elapsedSec = 0
     this.roundTime = []
 
@@ -146,8 +157,6 @@ export default class GameScene extends Phaser.Scene {
     // this.vail.setVisible(0)
   }
   create() {
-    // dev
-    // this.createVail()
     // this.game.events.on('blur', () => this.onAppBlur())
     // this.game.events.on('focus', () => this.onAppFocus())
 
@@ -158,29 +167,15 @@ export default class GameScene extends Phaser.Scene {
       fill: this.textColors.white,
     }).setDepth(100);
 
+    this.bonusCounter = this.add.text(200, 1000, 'BC:', {
+      font: '16px monospace',
+      fill: this.textColors.white,
+    }).setDepth(100);
+
     this.timeCounter = this.add.text(620, 1000, '0.00', {
       font: '16px monospace',
       fill: this.textColors.white,
     }).setDepth(100).setAlign('right').setOrigin(1, 0);
-
-
-    // this.demoText = this.add
-    //   .text(320, 120, 'BOUNCE_DEMO KINGO.BINGO @HENRY_HETZ', {
-    //     fontFamily: 'AvenirNextCondensedBold',
-    //     fontSize: '32px',
-    //     color: '#13469A',
-    //   })
-    //   .setAlign('center')
-    //   .setOrigin(0.5, 0.5)
-    //   .setAlpha(0)
-    // // .setAngle(30)
-    // this.tweens.add({
-    //   targets: this.demoText,
-    //   alpha: 0.3,
-    //   duration: 5000,
-    //   yoyo: true,
-    //   repeat: -1,
-    // })
 
     this.devUI = new DevUI(this)
     // this.cashoutChart = new CashoutChart(this)
@@ -227,7 +222,7 @@ export default class GameScene extends Phaser.Scene {
       onSettings: () => {
         // Implement settings button functionality here
         // пока ручка скорости игры
-        this.setTimeScale()
+        this.setTimeScale(0.5)
         // this.timeScale += 0.5
         // if (this.timeScale > 2) this.timeScale = 1
 
@@ -242,6 +237,7 @@ export default class GameScene extends Phaser.Scene {
     })
 
     if (!this.sounds) this.createSounds()
+
     setTimeout(() => {
       // this.sounds.jingle.play()
     }, 1000)
@@ -257,6 +253,7 @@ export default class GameScene extends Phaser.Scene {
     setTimeout(() => {
       // this.emoChat = new EmoChat(this)
     }, 1000);
+
     // dev
     const cameraOpts = {
       x: 290,
@@ -281,8 +278,8 @@ export default class GameScene extends Phaser.Scene {
         .setScale(1)
         .setDepth(this.cameraManager.widget.depth + 1)
   }
-  setTimeScale() {
-    this.timeScale += 0.5
+  setTimeScale(value) {
+    this.timeScale += value
     if (this.timeScale > 2) this.timeScale = 1
 
     this.gameSpeed = this.timeScale
@@ -338,9 +335,14 @@ export default class GameScene extends Phaser.Scene {
     this.hasBet = true
     this.setBetAllowed(false)
 
-    this.currentDeposit -= this.currentBetValue
-    if (this.currentDeposit <= 0)
-      this.currentDeposit = this.initialDeposit + this.currentDeposit
+    // dev
+    if (!this.isBonza) {
+      this.currentDeposit -= this.currentBetValue
+      if (this.currentDeposit <= 0)
+        this.currentDeposit = this.initialDeposit + this.currentDeposit
+    }
+
+
 
     this.events.emit('gameEvent', {
       mode: 'BET',
@@ -415,6 +417,20 @@ export default class GameScene extends Phaser.Scene {
           mode: 'BET_CHANGED',
           betValue: this.currentBetValue,
         })
+      }
+    })
+
+    // dev
+    this.events.on('gameEvent', (data) => {
+      if (data.mode === 'BONZA') {
+        if (this.hasBet && !this.hasCashOut) {
+          if (!this.isBonza) this.pendingBonzaAmount += data.amount
+          else this.bonzaCount += data.amount
+
+          this.bonusCountAmount += data.amount
+          console.log('new bonza', this.bonzaCount, this.pendingBonzaAmount)
+        }
+
       }
     })
     // this.game.events.on(Phaser.Core.Events.BLUR, () => this.scene.pause())
@@ -602,7 +618,9 @@ export default class GameScene extends Phaser.Scene {
       delay: roundStartDelay, // this.duration * roundStartDelay
       callback: () => {
         this.initCrashIndex() // хранить на сервере, запрашивать isCrash каждое касание (за 100 мс)
-        // console.log('crashIndex', this.crashIndex)
+        console.log('crashIndex', this.crashIndex)
+        // dev
+
         if (this.crashIndex >= this.payTable.length) console.log('проход до финиша')
         else console.log('crashIndex', this.crashIndex, 'X' + this.payTable[this.crashIndex].multiplier.toFixed(2))
 
@@ -643,30 +661,36 @@ export default class GameScene extends Phaser.Scene {
     this.fallStarter()
   }
   fallStarter() {
-    let mode = 'common'
+    let mode = 'usu'
     let duration = this.duration
     let amount = 1
 
-    console.log('this.bonzaCount', this.bonzaCount)
+    // console.log('this.bonzaCount', this.bonzaCount)
 
     if (this.bonzaCount > 0) {
-      mode = 'bonza' // mode: bonza ? 'bonza' : 'common', // dev
+      mode = 'bonza' // mode: bonza ? 'bonza' : 'usu', // dev
       const bonza = this.crashIndex === 0 ? false : true
-      amount = this.rnd.between(2, 5) // нужно брать по весу, больше больших
+      amount = this.rnd.between(1, 5) // нужно брать по весу, больше больших
 
       if (amount > this.crashIndex) amount = this.crashIndex
       // amount = 5 // dev
-      duration = 200 + amount * 400 + 200
+      duration = 200 + amount * 100 + 100
       // duration = 3000
     }
 
+    if (this.bonzaCount > 0) this.bonzaCount--
+
     this.events.emit('gameEvent', {
       mode: 'FALL',
+      bonzaCount: this.bonzaCount,
+      isBonza: this.isBonza, // всё это не нужно так делать!!!
+
       load: {
         mode: mode,
         amount: amount,
         duration: duration
       }
+
     })
 
     this.time.delayedCall(duration, () => {
@@ -680,8 +704,8 @@ export default class GameScene extends Phaser.Scene {
     if (this.isCrashed) this.fsm.toFinish()
     else {
       const multiplier = this.payTable[this.bounceCount].multiplier
-      const nextMultiplier = this.payTable[this.bounceCount + 1] ?
-        this.payTable[this.bounceCount + 1].multiplier : undefined
+      const nextMultiplier = this.payTable[this.bounceCount + amount] ?
+        this.payTable[this.bounceCount + amount].multiplier : undefined
 
       this.stakeValue = this.currentBetValue * multiplier
 
@@ -693,6 +717,8 @@ export default class GameScene extends Phaser.Scene {
         stakeValue: this.stakeValue,
         hasBet: this.hasBet,
         amount: amount,
+        isBonza: this.isBonza,
+        // bonzaCount: this.bonzaCount
       })
 
       if (this.bounceCount === 0 && !this.cashOutAllowed)
@@ -701,7 +727,8 @@ export default class GameScene extends Phaser.Scene {
       if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
 
       this.bounceCount += amount
-      if (this.bonzaCount > 0) this.bonzaCount--
+
+      if (this.bonzaCount === 0) this.isBonza = false
 
       // если нет продолжения нужно делать фейрверк
 
@@ -731,7 +758,7 @@ export default class GameScene extends Phaser.Scene {
     // this.events.emit('gameEvent', {
     //   mode: 'FALL',
     //   load: {
-    //     mode: 'common', // bonza common
+    //     mode: 'usu', // bonza usu
 
     //   }
     // })
@@ -745,6 +772,8 @@ export default class GameScene extends Phaser.Scene {
     this.paused = true;
     // this.sounds.crash.play()
     this.setCashOutAllowed(false)
+
+    if (this.pendingBonzaAmount) this.handleBonza()
 
     this.time.addEvent({
       delay: 1000,
@@ -815,6 +844,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // dispatch
+  handleBonza(amount) {
+    this.bonzaCount += this.pendingBonzaAmount
+    this.pendingBonzaAmount = 0
+    this.isBonza = true
+
+    this.bonusCount++
+    this.bonusCounter.setText('BC:' + this.bonusCount + '/' + this.bonusCountAmount)
+    // event
+  }
   handleRiskSettings(settings) {
     if (this.isDev) this.handleRiskSettings_local(settings)
     else this.handleRiskSettings_server(settings)
@@ -920,7 +958,6 @@ export default class GameScene extends Phaser.Scene {
     console.log('ratio', ratio)
 
     const RTP = 1 - this.houseEdge / 100
-    const houseEdge = .05
 
     let acc = 0
 
@@ -928,18 +965,9 @@ export default class GameScene extends Phaser.Scene {
 
     for (let i = 1; i <= crashSetting.steps; i++) {
       let multiplier, base, real_multyplier
-      // if (i === 0) {
-      //   multiplier = 1
-      //   real_multyplier = 1
-      //   base = 0
-      // } else {
+
       multiplier = crashSetting.minPayout * Math.pow(ratio, i - 1)
       base = RTP / multiplier
-
-      // dev
-      // real_multyplier = multiplier
-      // if (i !== crashSetting.steps - 1 && i !== 1) real_multyplier *= (1 - houseEdge)
-      // }
 
       crashTable.push({
         step: i,
@@ -1018,8 +1046,11 @@ export default class GameScene extends Phaser.Scene {
   }
   initCrashIndex_local() { // old
     let random = Math.random()
-    // random = 0.999999999 // dev - а что когда 1 или выше??
+    // random = 0.999999999 // dev 
+    if (this.bonzaCount > 0) random = Phaser.Math.FloatBetween(0.5, 1) // bonza
+
     console.log('random', random)
+
     let multiplier = null
     let index = 0
     let acc = 0
@@ -1035,7 +1066,7 @@ export default class GameScene extends Phaser.Scene {
       }
     }
     this.crashIndex = getCrashIndex(this.crashTable) // следующий будет краш!
-    // this.crashIndex > 0 ? (this.crashIndex += 1) : 0
+
 
     return this.crashIndex
   }

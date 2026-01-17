@@ -11,6 +11,8 @@ export class Ball {
 
     this.fujiY = 320 + this.diameter / 2
 
+    this.easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 0.5) // 0.7
+
     this.duration = scene.duration
     this.emitter = emitter
     this.bounceHandler = bounceHandler
@@ -44,7 +46,7 @@ export class Ball {
     // });
 
     this.isActive = false
-    this.bounceTween = null
+    this.ballTween = null
 
     this.createEvents()
     this.createEffects()
@@ -140,9 +142,9 @@ export class Ball {
       this.fallHandler(data.load) // 
     }
     if (data.mode === 'HIT') {
-      this.bounce() // всё надо синхронизировать 
+      this.bounce(data) // всё надо синхронизировать 
       // this.fall(this.bounceHandler)
-      this.updateEffects(data.multiplier)
+      // this.updateEffects(data.multiplier)
     }
     if (data.mode === 'FINISH') {
       this.stop()
@@ -245,15 +247,32 @@ export class Ball {
   }
   fallHandler(load) {
     // console.log('fallHandler', load.mode, load.depth)
-    if (load.mode === 'common') this.fall()
+    if (load.mode === 'usu') this.fall()
     if (load.mode === 'bonza') this.rush(load.amount)
+  }
+  bonza(amount) {
+    this.stopTween()
+    this.fall(() => {
+      // маленький отскок
+      this.scene.tweens.add({
+        targets: this.ball,
+        y: this.ball.y - 50,
+        x: this.x + 10,
+        duration: 400, // this.duration
+        ease: 'Qubic.easeOut', // Quart
+        onComplete: () => {
+
+        },
+      })
+    })
+
   }
   rush(amount) {
     this.stopTween()
 
     this.trail.start();
 
-    this.bounceTween =
+    this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
         y: this.hitPointY,
@@ -262,16 +281,12 @@ export class Ball {
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
           // рисовать след
-          // onUpdate твина
           this.trail.render(this.ball.y);
-          // this.trail.render(this.ball.x, this.ball.y - this.diameter / 2);
-          // this.drawShadow(this.ball.y, tween.progress)
-          // if (!patternSwitched && tween.progress > 0.95) {
-          // }
         },
         onComplete: () => {
+          // this.trail.stop();
           this.shake()
-
+          // this.scene.platforms.removeBlock()
 
           for (let index = 1; index <= amount; index++) {
             // пробиваем
@@ -279,7 +294,7 @@ export class Ball {
             this.scene.tweens.add({
               targets: this.ball,
               y: y,
-              delay: 200 * (index - 1),
+              delay: 100 * (index - 1),
               duration: 100,
               ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
               onComplete: () => {
@@ -299,7 +314,7 @@ export class Ball {
   }
   shake() {
     this.scene.cameras.main.shake(10, 0.005)
-    this.trail.render(this.ball.y);
+    // this.trail.render(this.ball.y);
   }
   drawShadow(y, progress) {
     // console.log('drawShadow', y, progress)
@@ -310,7 +325,7 @@ export class Ball {
     // this.trail.start();
     // console.log('ball fall start', this.scene.elapsedSec.toFixed(2))
 
-    this.bounceTween =
+    this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
         y: this.y + 20,
@@ -336,7 +351,7 @@ export class Ball {
               // this.trail.stop();
               // this.trail.render(this.ball.y);
               if (callback) callback()
-              // this.bounce(callback)
+
               // const timeNow = new Date().getTime();
               // console.log('ball hit', this.scene.elapsedSec)
             },
@@ -345,50 +360,30 @@ export class Ball {
       })
 
   }
-  bounce(callback) {
+  bounce(data) {
     // stop falling
     this.trail.stop();
     this.stopTween()
-    this.ball.y = this.y + this.distanceY
-
-    // var 1
-    // this.bouncing =
-    //   this.scene.tweens.add({
-    //     targets: this.ball,
-    //     y: this.y + 20,
-    //     duration: this.duration * 0.6, // this.duration
-    //     ease: 'Qubic.easeOut', // Quart
-    //     onComplete: () => {
-    //       // setTimeout(() => {
-    //       //   if (callback) callback()
-    //       // }, this.duration / 2);
-    //       this.scene.tweens.add({
-    //         targets: this.ball,
-    //         y: this.y,
-    //         duration: this.duration * 0.4, // this.duration
-    //         // yoyo: true,
-    //         ease: 'Quad.easeOut', // Qubic
-    //         // onYoyo: () => { },
-    //         onComplete: () => {
-    //           if (callback) callback()
-    //           // this.fall(callback)
-    //           // console.log('apogei',)
-    //         },
-    //       })
-    //       // if (callback) callback()
-    //       // console.log('bounce',)
-    //     },
-    //   })
+    // this.ball.y = this.y + this.distanceY
 
     // var 2
+    let delay = 0
+    let duration = this.duration
+    let ease = 'Quad.easeOut'
+    if (data.isBonza) {
+      // delay = 50
+      duration = 200
+      ease = this.easeBackInOut
+    }
     this.bouncing =
       this.scene.tweens.add({
         targets: this.ball,
         y: this.y,
-        duration: this.duration, // this.duration
-        ease: 'Quart.easeOut', // Quart
+        delay: delay,
+        duration: duration, // this.duration
+        ease: ease, // Quart
         onComplete: () => {
-          if (callback) callback()
+          // if (callback) callback()
         },
       })
   }
@@ -401,10 +396,10 @@ export class Ball {
     if (this.pulseTween) this.pulseTween.pause()
   }
   stopTween() {
-    if (this.bounceTween) this.bounceTween.stop()
+    if (this.ballTween) this.ballTween.stop()
   }
   setBounceTween(tween) {
-    this.bounceTween = tween
+    this.ballTween = tween
   }
 
   setTint(color) {
@@ -439,3 +434,34 @@ export class Ball {
     console.log('ball', this.x, this.y, this.ball)
   }
 }
+
+
+
+// var 1 bounce
+// this.bouncing =
+//   this.scene.tweens.add({
+//     targets: this.ball,
+//     y: this.y + 20,
+//     duration: this.duration * 0.6, // this.duration
+//     ease: 'Qubic.easeOut', // Quart
+//     onComplete: () => {
+//       // setTimeout(() => {
+//       //   if (callback) callback()
+//       // }, this.duration / 2);
+//       this.scene.tweens.add({
+//         targets: this.ball,
+//         y: this.y,
+//         duration: this.duration * 0.4, // this.duration
+//         // yoyo: true,
+//         ease: 'Quad.easeOut', // Qubic
+//         // onYoyo: () => { },
+//         onComplete: () => {
+//           if (callback) callback()
+//           // this.fall(callback)
+//           // console.log('apogei',)
+//         },
+//       })
+//       // if (callback) callback()
+//       // console.log('bounce',)
+//     },
+//   })

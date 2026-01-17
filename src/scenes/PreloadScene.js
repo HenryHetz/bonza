@@ -76,6 +76,9 @@ export default class PreloadScene extends Phaser.Scene {
   }
   preloadAssets() {
     // dev
+    this.load.image('bonza_logo_frame', 'assets/sprites/elements/bonza_logo_frame.png')
+    this.load.image('exits_frame_slogan', 'assets/sprites/elements/exits_frame_slogan.png')
+
     this.load.image('flash_copy', 'assets/sprites/elements/flash_copy.png')
     this.load.image('camera_frame', 'assets/sprites/dev/camera_frame.png')
     this.load.image('tuner_bg', 'assets/sprites/dev/tuner_.png')

@@ -2,14 +2,17 @@ export class BonzaMode {
   constructor(scene) {
     this.scene = scene
     this.x = 80
-    this.y = 140
+    this.y = 180
 
     this.amount = 0
 
-    this.logo = scene.add.image(this.x, this.y, 'stamp').setScale(1.2).setAlpha(0.2)
+    this.logoAlpha = 0.3
+
+    this.logo = scene.add.image(this.x, this.y, 'stamp').setScale(1.2).setAlpha(this.logoAlpha)
+    this.frame = scene.add.image(this.x, this.y, 'bonza_logo_frame')
 
     this.counter = scene.add
-      .text(this.x + 40, this.y - 40, this.amount, {
+      .text(this.x + 35, this.y - 35, this.amount, {
         // font: '60px japan', // walibi
         fill: this.scene.textColors.white,
         fontFamily: 'JapanRobot', // JapanRobot AvenirBlack
@@ -28,9 +31,9 @@ export class BonzaMode {
     this.scene.events.on('gameEvent', (data) => {
       if (data.mode === 'BONZA') {
         this.show(1)
-        console.log(this.scene.hasBet, this.scene.hasCashOut)
+        // console.log(this.scene.hasBet, this.scene.hasCashOut)
         if (this.scene.hasBet && !this.scene.hasCashOut) {
-          this.amount++
+          this.amount += data.amount
           this.set(this.amount)
           this.counter.alpha = 1
         }
@@ -46,11 +49,27 @@ export class BonzaMode {
         // this.counter.alpha = 0
         // this.amount = 0
         // this.set(this.amount)
+        this.amount = this.scene.bonzaCount
+        this.set(this.amount)
       }
 
-      if (data.mode === 'HIT') {
+      if (data.mode === 'FALL') {
         // console.log(data.count, 'nextMultiplier', data.nextMultiplier)
         // this.setNextMulty(data.nextMultiplier)
+        if (data.isBonza) {
+
+          this.amount = data.bonzaCount
+          this.set(this.amount)
+          if (this.amount) {
+            this.counter.alpha = 1
+            this.show(1)
+          } else {
+            this.counter.alpha = 0
+            this.show(this.logoAlpha)
+          }
+        }
+
+
       }
 
       if (data.mode === 'FINISH') {

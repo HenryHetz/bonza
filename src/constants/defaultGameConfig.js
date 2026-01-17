@@ -1,6 +1,7 @@
 // config/settings.js
 export const DEFAULT_GAME_CONFIG = {
-  initialBet: 1,
+  initialBet: 100,
   initialDeposit: 10000,
-  quickMode: false,
+  // quickMode: false,
+  gameSpeed: 2
 }

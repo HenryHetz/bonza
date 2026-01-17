@@ -18,6 +18,45 @@ export class DevUI {
     // this.scene.add.image(0, 0, 'bot_chat').setOrigin(0).setAlpha(0.2)
 
     // this.scene.add.image(0, 0, 'grid').setOrigin(0).setAlpha(0).setDepth(100)
+    // frame
+    const width = 140
+    const height = 320
+    const x = 80
+    const y = 340
+
+    const g = this.scene.add.graphics()
+    // console.log('frame color', width, height, color)
+    // console.log('frame color', this.scene.standartColors.black)
+    // параметры стиля
+    const strokeWidth = 2
+    const strokeColor = this.scene.standartColors.red // color ? color : 
+    const alpha = 1
+
+    g.__x = x - width / 2 + strokeWidth / 2;
+    g.__y = y + strokeWidth / 2;
+    g.__width = width - strokeWidth;
+    g.__height = height - strokeWidth;
+    g.__color = strokeColor;
+    g.__strokeWidth = strokeWidth;
+
+    g.lineStyle(g.__strokeWidth, strokeColor, alpha)
+    g.strokeRect(g.__x, g.__y, g.__width, g.__height);
+
+    this.label = this.scene.add
+      .text(x, y - 15, 'BEST_EXITS', {
+        // font: '24px walibi',
+        // fill: 'white',
+        // fontFamily: 'JapanRobot',
+        // fontSize: '16px',
+        // fill: this.scene.textColors.white,
+        color: this.scene.labelColor,
+        font: this.scene.labelFont
+      })
+      .setOrigin(0.5)
+    // .setAlign('left')
+    // .setAlpha(1)
+    // .setDepth(210)
+    this.slogan = this.scene.add.image(x, y + height / 2, 'exits_frame_slogan').setOrigin(0.5).setAlpha(0.5)
   }
   createEvents() {
     // this.scene.events.on('gameEvent', (data) => {

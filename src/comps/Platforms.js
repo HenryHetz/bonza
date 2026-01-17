@@ -18,6 +18,8 @@ export class Platforms {
         this.groupTotalHeight = 180
         this.blockWidth = 180
 
+        this.easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 1) // 0.7
+
         this.payTable = []
         this.lastKnownStep = 0 // индекс шага для рендера чисел (count из событий)
         this.chessPhase = 0
@@ -42,7 +44,7 @@ export class Platforms {
         this.tokenProbabilities = 0.2
     }
     initBonusSceme() {
-        this.patternProbabilities = 0.5 // 0.25 норм
+        this.patternProbabilities = this.scene.bonzaProbabilities // 0.25 норм
         return
         // dev
         const HE = this.scene.houseEdge
@@ -229,80 +231,122 @@ export class Platforms {
         const top = this.blocks[0]
         top.destroy()
         this.blocks.shift()
+        // console.log('Platforms removeBlock, remaining:', this.blocks.length)
     }
     onHit(data) {
-        if (!this.blocks.length) return
+        // if (!this.blocks.length) return
         // console.log(data.count, 'onHit:', data)
-        const top = this.blocks[0]
-        const removedH = top.__height * data.amount
+        if (!data.isBonza) {
 
-        // 1) выбиваем верхний
-        this.scene.tweens.add({
-            targets: top.list[0],
-            // y: top.y + 10,
-            alpha: 0,
-            delay: 0,
-            duration: 50,
-            onComplete: () => {
-                top.destroy()
-                // this.setNextMulty(data.count + 1)
-                // 4) выбираем новый паттерн (transitions позже)
-                // const next = this.pickNextPattern(this.currentPatternId)
-                // // const next = this.currentPattern // dev
-                // // console.log(this.currentPatternId, 'Next pattern:', next)
-                // // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
-                // this.applyPattern(next, { immediate: true })
-                // this.renderMultipliers(hitStep + 1)
-            }
-        })
+            const top = this.blocks[0]
+            // const singleBlockHeight = this.groupTotalHeight / this.currentPattern.length
+            const removedH = top.__height * data.amount
 
-        // 2) удаляем из массива
-        // for (let index = 0; index < data.amount; index++) {
-        //     this.blocks.shift()
+            // 1) выбиваем верхний
+            this.scene.tweens.add({
+                targets: top.list[0],
+                // y: top.y + 10,
+                alpha: 0,
+                delay: 0,
+                duration: 50,
+                onComplete: () => {
+                    // top.destroy()
+                    this.removeBlock()
+
+                    // this.setNextMulty(data.count + 1)
+                    // 4) выбираем новый паттерн (transitions позже)
+                    // const next = this.pickNextPattern(this.currentPatternId)
+                    // // const next = this.currentPattern // dev
+                    // // console.log(this.currentPatternId, 'Next pattern:', next)
+                    // // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
+                    // this.applyPattern(next, { immediate: true })
+                    // this.renderMultipliers(hitStep + 1)
+                }
+            })
+
+            // 2) удаляем из массива
+            // for (let index = 0; index < data.amount; index++) {
+            //     this.blocks.shift()
+            // }
+
+            // this.blocks.shift()
+
+
+
+            let patternSwitched = false
+
+            // 3) подтягиваем оставшиеся вверх (визуально)
+            this.scene.tweens.add({
+                targets: this.setContainer,
+                y: this.setContainer.y - removedH,
+                delay: 50,
+                duration: 200, //  Math.max(60, Math.floor(this.duration * 0.25))
+                // ease: 'Back.easeInOut', // Cubic Back.easeInOut
+                ease: this.easeBackInOut,
+                onUpdate: (tween) => {
+                    // 0.45–0.6 — зона максимальной скорости / минимального внимания
+                    // if (!patternSwitched && tween.progress > 0.95) {
+                    //     patternSwitched = true
+                    //     const next = this.pickNextPattern()
+                    //     this.applyPattern(next, { immediate: true })
+                    //     this.renderMultipliers(hitStep + 1)
+                    // }
+                },
+                onComplete: () => {
+                    this.setContainer.y = 0
+
+                    // не обязательно каждый раз выбирать из карты и менять паттерн!
+                    const next = this.pickNextPattern(this.currentPatternId) // this.currentPatternId
+
+                    // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
+                    this.applyPattern(next, { immediate: true })
+                    this.renderMultipliers(data.count + data.amount)
+                    this.showBonusBlocks(this.blocks)
+
+                },
+            })
+        } else {
+            // console.log('Platforms BONZA HIT data:', this.setContainer.y)
+            // console.log(data.count, 'onHit BONZA:', data)
+            // bonza mode - просто обновляем числа сверху вниз
+            const singleBlockHeight = this.groupTotalHeight / this.currentPattern.length
+            const removedH = singleBlockHeight * data.amount
+
+            this.scene.tweens.add({
+                targets: this.setContainer,
+                y: this.setContainer.y - removedH,
+                delay: 0,
+                duration: 200, //  Math.max(60, Math.floor(this.duration * 0.25))
+                // ease: 'Back.easeInOut', // Cubic Back.easeInOut
+                ease: this.easeBackInOut,
+                onUpdate: (tween) => {
+                },
+                onComplete: () => {
+                    this.setContainer.y = 0
+                    this.rerenderBlocks(data)
+                },
+            })
+        }
+    }
+    rerenderBlocks(data) {
+        // не обязательно каждый раз выбирать из карты и менять паттерн!
+        // if (data.isBonza) {
+        //     this.renderMultipliers(data.count + data.amount)
+        //     this.showBonusBlocks(this.blocks)
+        //     return
         // }
-
-        this.blocks.shift()
-
-
-        const easeBackInOut = (v) => Phaser.Math.Easing.Back.InOut(v, 1) // 0.7
-        let patternSwitched = false
-
-        // 3) подтягиваем оставшиеся вверх (визуально)
-        this.scene.tweens.add({
-            targets: this.setContainer,
-            y: this.setContainer.y - removedH,
-            delay: 50,
-            duration: 200, //  Math.max(60, Math.floor(this.duration * 0.25))
-            // ease: 'Back.easeInOut', // Cubic Back.easeInOut
-            ease: easeBackInOut,
-            onUpdate: (tween) => {
-                // 0.45–0.6 — зона максимальной скорости / минимального внимания
-                // if (!patternSwitched && tween.progress > 0.95) {
-                //     patternSwitched = true
-                //     const next = this.pickNextPattern()
-                //     this.applyPattern(next, { immediate: true })
-                //     this.renderMultipliers(hitStep + 1)
-                // }
-            },
-            onComplete: () => {
-                this.setContainer.y = 0
-
-                // не обязательно каждый раз выбирать из карты и менять паттерн!
-                const next = this.pickNextPattern(this.currentPatternId) // this.currentPatternId
-
-                // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
-                this.applyPattern(next, { immediate: true })
-                this.renderMultipliers(data.count + 1)
-                this.showBonusBlocks(this.blocks)
-
-            },
-        })
+        const next = this.pickNextPattern(this.currentPatternId) // this.currentPatternId
+        // console.log('Platforms rerenderBlocks next pattern:', next)
+        // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
+        this.applyPattern(next, { immediate: true })
+        this.renderMultipliers(data.count + data.amount)
+        this.showBonusBlocks(this.blocks)
     }
     applyPattern(patternObj, { immediate = true } = {}) {
         this.currentPattern = patternObj.pattern
         this.currentPatternId = patternObj.id
 
-        // console.log('applyPattern',)
+        // console.log('applyPattern', this.currentPattern)
 
         this.setContainer.removeAll(true)
         this.blocks = []
@@ -347,6 +391,7 @@ export class Platforms {
         }
     }
     renderMultipliers(startStep) {
+        // console.log('renderMultipliers from step', startStep)
         // startStep = какой индекс payTable показываем на верхнем блоке
         const table = this.payTable
         if (!Array.isArray(table) || table.length === 0) return
@@ -369,17 +414,7 @@ export class Platforms {
             b.__text.setText(text)
         }
     }
-
-    // -----------------------
-    // Pattern selection (hook for transitions)
-    // -----------------------
-
     pickNextPattern(prevId) {
-        // let amount = 4
-        // if (this.lastKnownMulty >= 2) amount = 3 // 10
-        // if (this.lastKnownMulty >= 10) amount = 2 // 100
-        // if (this.lastKnownStep + 1 === this.payTable.length - 1) amount = 1 // на последную ставим одиночный
-
         const amount = this.multiplierToAmount()
         let candidates = this.compiledMap.list.filter((p) => p.blocks === amount)
 
@@ -410,15 +445,14 @@ export class Platforms {
 
         let amount = 5
 
-        if (!this.scene.bonzaCount > 0) { // а если мы подходим к концу???
-            if (this.lastKnownMulty >= 2) amount = 4
-            if (this.lastKnownMulty >= 10) amount = 3
-            if (this.lastKnownMulty >= 100) amount = 2
+        if (this.lastKnownMulty >= 2) amount = 4
+        if (this.lastKnownMulty >= 10) amount = 3
+        if (this.lastKnownMulty >= 100) amount = 2
 
-            // ближайшее меньшее (или равное) из 6-4-3-2-1
-            const STEPS = [5, 4, 3, 2, 1]
-            amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
-        }
+        // ближайшее меньшее (или равное) из 6-4-3-2-1
+        const STEPS = [5, 4, 3, 2, 1]
+        amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
+
 
         return amount
     }
@@ -836,8 +870,11 @@ export class Platforms {
             // this.scene.bonzaMode.set(count)
 
             // УБРАТЬ ОТСЮДА!!! 
-            this.scene.events.emit('gameEvent', { mode: 'BONZA' })
-            this.scene.bonzaCount += count
+            this.scene.events.emit('gameEvent', {
+                mode: 'BONZA',
+                amount: count,
+            })
+            // this.scene.bonzaCount += count
         }
     }
 

@@ -18,7 +18,7 @@ export class ModeLabel {
       .setDepth(210)
 
     this.counter = scene.add
-      .text(this.x, this.y, 'COM', {
+      .text(this.x, this.y, 'USU', {
         // font: '24px walibi',
         // fill: 'white',
         fontFamily: 'JapanRobot',
@@ -42,7 +42,7 @@ export class ModeLabel {
       }
       if (data.mode === 'FALL') {
         this.set(data.load.mode)
-        // if (data.load.mode === 'common') this.fall()
+        // if (data.load.mode === 'usu') this.fall()
         // if (data.load.mode === 'bonza') this.rush(load.depth)
       }
     })

@@ -35,7 +35,7 @@ export class DevUI {
     // параметры стиля
     const strokeWidth = 2
     const strokeColor = this.scene.standartColors.red // color ? color : 
-    const alpha = 1
+    const alpha = 0
 
     g.__x = x - width / 2 + strokeWidth / 2;
     g.__y = y + strokeWidth / 2;

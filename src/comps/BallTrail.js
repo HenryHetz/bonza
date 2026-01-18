@@ -7,7 +7,7 @@ export class BallTrail {
         this.scene = scene;
 
         this.x = obj.x
-        this.topY = obj.y - 110
+        this.topY = obj.y - 180
         this.color = { r: 255, g: 0, b: 55 }
         this.key = 'ballTrail';
         this.w = obj.width;
@@ -54,7 +54,7 @@ export class BallTrail {
     }
 
     /** Каждый кадр: обновляем только нижнюю точку */
-    render(bottomY) {
+    render(bottomY, topY) {
         if (!this.active) return;
         // if (!Number.isFinite(bottomY) || !Number.isFinite(this.topY) || !Number.isFinite(this.x)) return;
 
@@ -62,8 +62,9 @@ export class BallTrail {
         // const bY = Math.max(this.topY, bottomY);
 
         // const len = bY - tY;
-
-        const len = bottomY - this.topY
+        const tY = Number.isFinite(topY) ? topY : this.topY;
+        const bY = bottomY;
+        const len = bottomY - tY
         if (!(len > 0)) return;
 
         const h = Math.min(len, this.H);
@@ -72,7 +73,7 @@ export class BallTrail {
 
         // позиционирование и показ без scale
         this.img.x = this.x;
-        this.img.y = this.topY;
+        this.img.y = tY;
 
         this.img.setCrop(0, 0, this.w, hh);
 
@@ -106,9 +107,10 @@ export class BallTrail {
     /** Отключить/спрятать */
     stop() {
         // console.log('stop trail')
+        this.render(this.topY + 110); // отрисовать до верха
         this.active = false;
         this.img.setVisible(false);
-        this.img.setCrop();
+        // this.img.setCrop();
     }
 
     destroy(removeTexture = false) {

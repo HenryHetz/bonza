@@ -271,10 +271,24 @@ export class Ball {
     })
 
   }
+  miniFall(time,) {
+    this.stopTween()
+    this.ballTween =
+      this.scene.tweens.add({
+        targets: this.ball,
+        y: y,
+        delay: load.drillTime * (index),
+        duration: load.drillTime, // this.duration / 2
+        ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+        onComplete: () => {
+          this.scene.platforms.removeBlock()
+        },
+      })
+  }
   rush(load) {
     this.stopTween()
 
-    // this.trail.start();
+    this.trail.start();
 
     this.ballTween =
       this.scene.tweens.add({
@@ -285,11 +299,30 @@ export class Ball {
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
           // рисовать след
-          this.trail.render(this.ball.y);
+          this.trail.render(this.ball.y - 20);
         },
         onComplete: () => {
           // this.trail.stop();
           this.shake()
+          // плавно убрать длину хвоста
+          this.scene.tweens.add({
+            targets: this.trail,
+            alpha: 0.8,
+            duration: load.drillTime * 2, // this.duration / 2
+            // ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+            onUpdate: (tween) => {
+              // рисовать след
+              const len = (this.ball.y - 20 - this.y + 180) * (1 - tween.progress)
+              // console.log('rush onUpdate', tween.progress, len)
+              this.trail.render(this.ball.y - 20, this.ball.y - 20 - len);
+            },
+            onComplete: () => {
+              this.trail.alpha = 1
+              this.trail.stop()
+            },
+          })
+
+
           // надо закрашивать первую платформу в серый
           // или красный
           // она - самое напряжение игрока
@@ -306,9 +339,11 @@ export class Ball {
               duration: load.drillTime, // this.duration / 2
               ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
               onComplete: () => {
-                this.trail.render(this.ball.y);
-                // this.trail.stop();
-                // this.shake()
+                // this.trail.render(this.ball.y - 20);
+                // if (index === load.amount) {
+                //   this.trail.stop()
+                // } else this.trail.render(this.ball.y - 20);
+
                 // dev
                 this.scene.platforms.removeBlock()
 
@@ -321,7 +356,10 @@ export class Ball {
       })
   }
   shake() {
-    this.scene.cameras.main.shake(10, 0.005)
+    // const time = Phaser.Math.Between(0.005, 0.001)
+    const intensity = Phaser.Math.Between(0.002, 0.005)
+    const duration = Phaser.Math.Between(50, 100)
+    this.scene.cameras.main.shake(duration, 0.005)
     // this.trail.render(this.ball.y);
   }
   drawShadow(y, progress) {
@@ -370,7 +408,7 @@ export class Ball {
   }
   bounce(data) {
     // stop falling
-    this.trail.stop();
+    // this.trail.stop();
     this.stopTween()
     // this.ball.y = this.y + this.distanceY
 

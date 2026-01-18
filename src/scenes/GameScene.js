@@ -37,7 +37,7 @@ export default class GameScene extends Phaser.Scene {
   }
   preload() { }
   init() {
-    this.bonzaCount = 10 // dev
+    this.bonzaCount = 1 // dev
     this.isBonza = this.bonzaCount > 0
 
     this.pendingBonzaAmount = 0
@@ -48,10 +48,10 @@ export default class GameScene extends Phaser.Scene {
     this.minBonzaRandom = 0.5 // для RNG - min X >=2 ?
 
     this.paused = true;
-    // dev - prod
+    // dev 
     this.isDev = true
     this.timeScale = 1
-    // this.timeScale = -0.4 // dev
+    // this.timeScale = 0.1 // dev
     this.gameSpeed = DEFAULT_GAME_CONFIG.gameSpeed
     if (this.gameSpeed > this.timeScale) {
       let value = this.gameSpeed - 1
@@ -672,8 +672,8 @@ export default class GameScene extends Phaser.Scene {
     let duration = this.duration
     let amount = 1
 
-    const fallTime = 200
-    const drillTime = 300
+    const fallTime = 100
+    const drillTime = 200
 
     // console.log('this.bonzaCount', this.bonzaCount)
 

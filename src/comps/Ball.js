@@ -167,29 +167,35 @@ export class Ball {
   reset() {
     // this.clearTint()
     // this.ball.y = this.y
-    this.scene.tweens.add({
-      targets: this.ball,
-      y: this.y,
-      alpha: 1,
-      duration: 1000,
-      ease: 'Quad.easeOut',
-    })
+    this.stopTween()
+    this.ballTween =
+      this.scene.tweens.add({
+        targets: this.ball,
+        y: this.y,
+        alpha: 1,
+        duration: 1000,
+        ease: 'Quad.easeOut',
+      })
   }
   up() {
-    this.scene.tweens.add({
-      targets: this.ball,
-      delay: 0,
-      alpha: 0,
-      duration: 0,
-      onComplete: () => {
-        this.scene.tweens.add({
-          targets: this.ball,
-          delay: 100,
-          y: this.fujiY, // уходит в фуджи
-          duration: 0,
-        })
-      },
-    })
+    this.stopTween()
+    this.ballTween =
+      this.scene.tweens.add({
+        targets: this.ball,
+        delay: 0,
+        alpha: 0,
+        duration: 0,
+        onComplete: () => {
+          this.stopTween()
+          this.ballTween =
+            this.scene.tweens.add({
+              targets: this.ball,
+              delay: 100,
+              y: this.fujiY, // уходит в фуджи
+              duration: 0,
+            })
+        },
+      })
   }
   fallAndBounce(callback) {
     const scene = this.scene;
@@ -258,27 +264,30 @@ export class Ball {
     this.stopTween()
     this.fall(() => {
       // маленький отскок
-      this.scene.tweens.add({
-        targets: this.ball,
-        y: this.ball.y - 50,
-        x: this.x + 10,
-        duration: 400, // this.duration
-        ease: 'Qubic.easeOut', // Quart
-        onComplete: () => {
 
-        },
-      })
+      this.ballTween =
+        this.scene.tweens.add({
+          targets: this.ball,
+          y: this.ball.y - 50,
+          x: this.x + 10,
+          duration: 400, // this.duration
+          ease: 'Qubic.easeOut', // Quart
+          onComplete: () => {
+
+          },
+        })
     })
 
   }
-  miniFall(time,) {
+  miniFall(time, distance,) {
     this.stopTween()
+
     this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
-        y: y,
-        delay: load.drillTime * (index),
-        duration: load.drillTime, // this.duration / 2
+        y: this.ball.y + distance,
+        // delay: load.drillTime * (index),
+        duration: time, // this.duration / 2
         ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
         onComplete: () => {
           this.scene.platforms.removeBlock()
@@ -358,7 +367,7 @@ export class Ball {
   shake() {
     // const time = Phaser.Math.Between(0.005, 0.001)
     const intensity = Phaser.Math.Between(0.002, 0.005)
-    const duration = Phaser.Math.Between(50, 100)
+    const duration = Phaser.Math.Between(20, 60)
     this.scene.cameras.main.shake(duration, 0.005)
     // this.trail.render(this.ball.y);
   }
@@ -431,17 +440,19 @@ export class Ball {
         onComplete: () => {
           if (data.isBonza) {
             // немного подлетим
-            this.scene.tweens.add({
-              targets: this.ball,
-              y: this.y - 100,
-              // delay: delay,
-              duration: 700, // this.duration
-              yoyo: true,
-              ease: this.easeNewOut, // Quad Quart
-              onComplete: () => {
-                // this.ball.y = this.y
-              },
-            })
+            this.stopTween()
+            this.ballTween =
+              this.scene.tweens.add({
+                targets: this.ball,
+                y: this.y - 100,
+                // delay: delay,
+                duration: 700, // this.duration
+                yoyo: true,
+                ease: this.easeNewOut, // Quad Quart
+                onComplete: () => {
+                  // this.ball.y = this.y
+                },
+              })
           }
         },
       })

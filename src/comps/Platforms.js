@@ -454,6 +454,9 @@ export class Platforms {
         const STEPS = [5, 4, 3, 2, 1]
         amount = STEPS.find(v => v <= Math.min(amount, stepLeft)) ?? 1
 
+        // dev
+        if (stepLeft >= 5 && this.scene.isBonza) amount = 5
+
 
         return amount
     }

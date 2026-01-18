@@ -254,7 +254,7 @@ export default class GameScene extends Phaser.Scene {
 
     // dev
     setTimeout(() => {
-      this.emoChat = new EmoChat(this)
+      // this.emoChat = new EmoChat(this)
     }, 1000);
 
     // dev
@@ -376,6 +376,9 @@ export default class GameScene extends Phaser.Scene {
     })
 
     this.stakeValue = 0
+
+    // finish?
+    // this.fsm.toFinish()
   }
   createEvents() {
     // первый раунд ждём ручного старта
@@ -670,7 +673,7 @@ export default class GameScene extends Phaser.Scene {
     let amount = 1
 
     const fallTime = 200
-    const drillTime = 100
+    const drillTime = 300
 
     // console.log('this.bonzaCount', this.bonzaCount)
 
@@ -681,11 +684,11 @@ export default class GameScene extends Phaser.Scene {
 
       if (amount > this.crashIndex) amount = this.crashIndex
       // amount = 5 // dev
-      duration = fallTime + amount * drillTime + 100
+      duration = fallTime + amount * drillTime + 400
       // duration = 3000
     }
 
-    if (this.bonzaCount > 0) this.bonzaCount--
+    // if (this.bonzaCount > 0) this.bonzaCount--
 
     this.events.emit('gameEvent', {
       mode: 'FALL',
@@ -757,7 +760,15 @@ export default class GameScene extends Phaser.Scene {
   onBounce() {
     // console.log('onBounce', this.paused)
     if (this.paused) return
+
+    // dev - bad
+    // if (this.hasBet && this.hasCashOut) {
+    //   this.fsm.toFinish()
+    //   return
+    // }
+
     // запросы на сервер? Что здесь?
+
     let delayBeforeFall = 0
     if (this.bonzaCount > 0) delayBeforeFall = 1000
     this.time.delayedCall(delayBeforeFall, () => {
@@ -781,7 +792,7 @@ export default class GameScene extends Phaser.Scene {
     this.paused = true;
     // this.sounds.crash.play()
     this.setCashOutAllowed(false)
-
+    if (this.bonzaCount > 0) this.bonzaCount--
     if (this.pendingBonzaAmount) this.handleBonza()
 
     this.time.addEvent({

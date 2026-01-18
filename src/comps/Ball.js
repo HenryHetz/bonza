@@ -290,6 +290,10 @@ export class Ball {
         onComplete: () => {
           // this.trail.stop();
           this.shake()
+          // надо закрашивать первую платформу в серый
+          // или красный
+          // она - самое напряжение игрока
+
           // this.scene.platforms.removeBlock()
 
           for (let index = 1; index <= load.amount; index++) {
@@ -298,7 +302,7 @@ export class Ball {
             this.scene.tweens.add({
               targets: this.ball,
               y: y,
-              delay: load.drillTime * (index - 1),
+              delay: load.drillTime * (index),
               duration: load.drillTime, // this.duration / 2
               ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
               onComplete: () => {
@@ -393,7 +397,7 @@ export class Ball {
               targets: this.ball,
               y: this.y - 100,
               // delay: delay,
-              duration: 750, // this.duration
+              duration: 700, // this.duration
               yoyo: true,
               ease: this.easeNewOut, // Quad Quart
               onComplete: () => {

@@ -2,7 +2,7 @@ export class BonzaMode {
   constructor(scene) {
     this.scene = scene
     this.x = 80
-    this.y = 180
+    this.y = 160
 
     this.amount = 0
 

@@ -3,6 +3,7 @@ import {
   generateMaxPayoutArray,
   generateStepsArray,
 } from './RiskTunerData'
+
 import { RiskSlider } from './RiskSlider'
 import { RiskChart } from './RiskChart'
 import {
@@ -17,6 +18,9 @@ import { ButtonGraphics } from '../ButtonGraphics'
 export class RiskTunerPanel {
   constructor(scene, riskSetting) {
     this.scene = scene
+
+    // dev
+    this.isVisible = false
 
     // --- Генерируем массивы дискретных значений
     this.settingArrays = {
@@ -38,7 +42,7 @@ export class RiskTunerPanel {
     this.previousDraftValues = { ...riskSetting }
 
     // --- Контейнер для всего UI
-    this.container = scene.add.container(0, 0).setDepth(20).setVisible(false)
+    this.container = scene.add.container(0, 0).setDepth(20).setVisible(this.isVisible)
 
     this.createUI()
     this.createEvents()
@@ -47,43 +51,55 @@ export class RiskTunerPanel {
   createUI() {
     const { scene, container } = this
 
-    // --- Фон (теперь интерактивный, вместо старого vail)
-    // this.bg = scene.add
-    //   .image(0, 0, 'tuner_bg')
-    //   .setOrigin(0)
-    //   .setAlpha(0)
-    //   .setInteractive()
+    // color: labelColor,
+    // font: labelFont
 
-    this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
+    // --- Фон (теперь интерактивный, вместо старого vail)
+
+    this.bg = scene.add
+      .image(0, 0, 'tuner_bg')
+      .setOrigin(0)
+      .setAlpha(1)
+      .setInteractive()
+
+    // this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
 
     // --- Заголовок
     // this.naming = scene.add
     //   .image(scene.sceneCenterX, scene.gridUnit * 1.8, 'risk_tuner')
     //   .setOrigin(0.5)
 
+    // --- Заголовок текстом
     this.naming = scene.add
-      .text(scene.sceneCenterX - 200, scene.gridUnit * 2, '#RISK_TUNER', {
-        fontSize: '38px',
-        color: '#FDD41D',
-        fontFamily: 'walibi',
+      .text(scene.sceneCenterX, 120, 'RISK_TUNER', {
+        fontFamily: this.scene.mainFontFamily,
+        fontSize: '40px',
+        fill: this.scene.textColors.black, // black
       })
-      .setOrigin(0, 0.5)
+      .setOrigin(0.5)
 
+    // Картинка датчика / тахометр
+    this.tachometer = scene.add.image(scene.sceneCenterX, 260, 'risk_tuner_panel')
+      .setOrigin(0.5)
+      .setScale(1.5)
     // --- Нотация
     this.notation = scene.add
-      .text(scene.sceneCenterX - 200, scene.gridUnit * 3.2, '', {
-        fontSize: '24px',
-        color: '#FDD41D',
-        fontFamily: 'AvenirNextCondensedBold',
+      .text(scene.sceneCenterX - 140, 380, '', {
+        // fontSize: '24px',
+        // color: '#FDD41D',
+        // fontFamily: 'AvenirNextCondensedBold',
+        fontFamily: this.scene.labelFontFamily,
+        fontSize: '20px',
+        color: this.scene.textColors.dark_gray,
       })
-      .setOrigin(0, 0.5)
+      .setOrigin(0, 0)
 
     this.notation.update = (setting) => {
       const lines = [
-        `Steps_${setting.steps}`,
-        `Min_X_${setting.minPayout}`,
-        `Max_X_${setting.maxPayout}`,
-        `EDGE_1%`, // ${scene.houseEdge}
+        `Steps: ${setting.steps}`,
+        `Min: ${setting.minPayout}`,
+        `Max: ${setting.maxPayout}`,
+        // `EDGE_1%`, // ${scene.houseEdge}
       ]
       this.notation.setText(lines)
     }
@@ -92,14 +108,15 @@ export class RiskTunerPanel {
     const verticalIndent = 80
 
     // --- Чарт
-    this.chart = new RiskChart(scene, 120, blockY)
+    this.chart = new RiskChart(scene, 180, blockY)
+
 
     // --- Слайдеры
     this.slider1 = new RiskSlider(
       scene,
       320,
       blockY + 2 * verticalIndent,
-      'MIN PAYOUT',
+      'MIN',
       this.settingArrays.minPayout[0],
       this.settingArrays.minPayout[this.settingArrays.minPayout.length - 1]
     )
@@ -107,7 +124,7 @@ export class RiskTunerPanel {
       scene,
       320,
       blockY + 3 * verticalIndent,
-      'MAX PAYOUT',
+      'MAX',
       this.settingArrays.maxPayout[0],
       this.settingArrays.maxPayout[this.settingArrays.maxPayout.length - 1]
     )
@@ -138,79 +155,117 @@ export class RiskTunerPanel {
     }
     // --- Кнопки
     this.buttonClose = scene.add
-      .image(640 - scene.buttonIndent, scene.buttonY, 'button_close')
+      .image(640 - scene.buttonIndent + 20, scene.buttonY, 'button_close')
       .setOrigin(0.5)
-      .setScale(0.8)
+      .setScale(1)
       .setInteractive()
 
-    this.buttonReset = scene.add
-      .image(scene.buttonIndent, scene.buttonY, 'button_reset')
-      .setOrigin(0.5)
-      .setScale(0.8)
-      .setInteractive()
-    // .setFlipX(true)
-    // .setScale(1)
-
-    // this.buttonAction = scene.add
-    //   .image(scene.sceneCenterX, scene.buttonY, 'button_create')
-    //   .setOrigin(0.5)
-    //   .setInteractive()
-    //   .setAlpha(0.6)
-
-    this.buttonAction = new ButtonGraphics(
-      this.scene,
-      scene.sceneCenterX,
-      scene.buttonY,
-      'yellow'
-    ).setAlpha(0.6)
-
-    this.buttonAction.enableHitbox()
-    // this.buttonAction.on('pointerdown', () => this.onCash?.())
-
-    this.buttonActionLabel = this.scene.add
-      .text(this.buttonAction.x, this.buttonAction.y, 'SET', {
-        font: '40px walibi',
-        fill: 'black',
-      })
-      .setOrigin(0.5)
-      .setAlign('center')
-
-    this.textClose = scene.add
+    this.labelClose = scene.add
       .text(
         this.buttonClose.x,
         this.buttonClose.y - scene.buttonNameSpacing,
         'CLOSE',
         {
-          fontFamily: 'AvenirNextCondensedBold',
-          fontSize: '18px',
-          color: '#13469A',
+          // fontFamily: 'AvenirNextCondensedBold',
+          // fontSize: '18px',
+          // color: '#13469A',
         }
       )
       .setOrigin(0.5, 0)
+      .setAlpha(0)
 
-    this.textReset = scene.add
+
+    // reset button
+    this.buttonReset = scene.add
+      .image(scene.sceneCenterX - 120, scene.buttonY, 'button_square')
+      .setOrigin(0.5)
+      .setScale(1)
+      .setInteractive()
+    // .setFlipX(true)
+    // .setScale(1)
+
+    this.labelReset = scene.add
       .text(
         this.buttonReset.x,
-        this.buttonReset.y - scene.buttonNameSpacing,
-        'DEFAULT',
+        this.buttonReset.y,
+        'RE-\nSET',
         {
-          fontFamily: 'AvenirNextCondensedBold',
-          fontSize: '18px',
-          color: '#13469A',
+          fontFamily: this.scene.mainFontFamily,
+          fontSize: '24px',
+          fill: this.scene.textColors.black, // black
         }
       )
-      .setOrigin(0.5, 0)
+      .setOrigin(0.5)
+
+    // random button
+    this.buttonRandom = scene.add
+      .image(scene.sceneCenterX + 120, scene.buttonY, 'button_square')
+      .setOrigin(0.5)
+      .setScale(1)
+      .setInteractive()
+    // .setFlipX(true)
+    // .setScale(1)
+
+    this.labelRandom = scene.add
+      .text(
+        this.buttonRandom.x,
+        this.buttonRandom.y,
+        'RAN\nDOM',
+        {
+          fontFamily: this.scene.mainFontFamily,
+          fontSize: '24px',
+          fill: this.scene.textColors.black, // black
+        }
+      )
+      .setOrigin(0.5)
+
+
+
+    // Главная кнопка действия
+    this.buttonActionAlpha = 1
+
+    this.buttonAction = scene.add
+      .image(scene.sceneCenterX, scene.buttonY, 'button_set_gray')
+      .setOrigin(0.5)
+      .setInteractive()
+      .setAlpha(this.buttonActionAlpha)
+
+    // this.buttonAction = new ButtonGraphics(
+    //   this.scene,
+    //   scene.sceneCenterX,
+    //   scene.buttonY,
+    //   'yellow'
+    // ).setAlpha(0.6)
+
+    // this.buttonAction.enableHitbox()
+    // this.buttonAction.on('pointerdown', () => this.onCash?.())
+
+    this.buttonActionLabel = this.scene.add
+      .text(this.buttonAction.x, this.buttonAction.y, 'SET', {
+        // font: '40px walibi',
+        // fill: 'black',
+        fontFamily: this.scene.mainFontFamily,
+        fontSize: '40px',
+        fill: this.scene.textColors.black, // black
+      })
+      .setOrigin(0.5)
+      .setAlign('center')
+
+
 
     // --- Добавляем в контейнер
     container.add([
       this.bg,
       this.naming,
+      this.tachometer,
       this.notation,
       this.chart.graphics,
       this.buttonClose,
-      this.textClose,
+      this.labelClose,
       this.buttonReset,
-      this.textReset,
+      this.labelReset,
+      this.buttonRandom,
+      this.labelRandom,
       this.buttonAction,
       this.buttonActionLabel,
       this.slider1.container,
@@ -274,7 +329,7 @@ export class RiskTunerPanel {
       // === Обновляем UI ===
       this.notation.update(this.draftRiskSetting)
       this.updateChart(this.draftRiskSetting)
-      this.updateCreateButton()
+      this.updateSetButton()
     })
 
     // --- Кнопки
@@ -308,8 +363,16 @@ export class RiskTunerPanel {
     )
   }
 
-  updateCreateButton() {
-    this.buttonAction.setAlpha(this.isDraftChanged() ? 1 : 0.7)
+  updateSetButton() {
+    // this.buttonAction.setAlpha(this.isDraftChanged() ? 1 : this.buttonActionAlpha)
+
+    if (this.isDraftChanged()) {
+      this.buttonAction.setTexture('button_set_red')
+      // this.buttonActionLabel.setText('SET')
+    } else {
+      this.buttonAction.setTexture('button_set_gray')
+      // this.buttonActionLabel.setText('NO CHANGES')
+    }
   }
 
   applyDraft() {
@@ -325,7 +388,7 @@ export class RiskTunerPanel {
     this.setSliders(this.draftRiskSetting)
     this.notation.update(this.draftRiskSetting)
     this.updateChart(this.draftRiskSetting)
-    this.updateCreateButton()
+    this.updateSetButton()
   }
 
   getNormalizedFromArray(array, value) {
@@ -362,7 +425,7 @@ export class RiskTunerPanel {
       this.setSliders(this.draftRiskSetting)
       this.notation.update(this.draftRiskSetting)
       this.updateChart(this.draftRiskSetting)
-      this.updateCreateButton()
+      this.updateSetButton()
     }
   }
 

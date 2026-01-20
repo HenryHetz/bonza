@@ -59,6 +59,7 @@ export default class GameScene extends Phaser.Scene {
     }
     //this.setTimeScale(-0.8) // dev
     //this.time.timeScale = this.timeScale
+    this.duration = 500 // это не duration, а половина цикла
 
     this.houseEdge = 5.00 // его не должно быть в локале!
 
@@ -134,15 +135,22 @@ export default class GameScene extends Phaser.Scene {
       gray: '#bcbcbcff', // '#cccccc' 'rgba(101, 101, 101, 1)'
       yellow: '#fcd912',
       blue: '#05edff',
-      black: '#000000'
+      black: '#000000',
+      dark_gray: '#262626',
     }
 
     // UI SETTINGS
     this.buttonNameSpacing = 60
     this.buttonIndent = 100
+
     this.labelColor = this.textColors.white
+    this.labelFontFamily = 'AvenirBlack'
     this.labelFont = '14px AvenirBlack'
-    this.duration = 500 // это не duration, а половина цикла
+
+    this.mainFontColor = this.textColors.black
+    this.mainFont = '40px JapanRobot'
+    this.mainFontFamily = 'JapanRobot'
+
 
   }
   createVail() {

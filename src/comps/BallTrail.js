@@ -12,7 +12,7 @@ export class BallTrail {
         this.key = 'ballTrail';
         this.w = obj.width;
         this.H = 1000; // Math.max(8, 1000 | 0)
-        this.depth = 100;
+        this.depth = 10;
 
         this.r = this.color.r;
         this.g = this.color.g;

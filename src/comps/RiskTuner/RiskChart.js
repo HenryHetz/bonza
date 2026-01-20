@@ -3,12 +3,14 @@
 export class RiskChart {
   constructor(scene, chartX, chartY) {
     this.scene = scene
-    this.chartX = chartX
-    this.chartY = chartY
-    this.barWidth = 50
+    this.chartX = 180
+    this.chartY = 7 * scene.gridUnit
+    this.barWidth = 32
     this.barGap = 10
-    this.chartHeight = 400
+    this.chartHeight = 200
     this.barsCount = 7
+    this.barColor = this.scene.standartColors.gray
+    this.barFrameColor = this.scene.standartColors.black
 
     this.graphics = scene.add.graphics()
 
@@ -21,7 +23,11 @@ export class RiskChart {
 
   redraw() {
     this.graphics.clear()
-    this.graphics.fillStyle(0xff0000, 1)
+    // this.graphics.fillStyle(0xff0000, 1)
+    const strokeWidth = 4
+    const strokeColor = this.scene.standartColors.black // color ? color : 
+    const alpha = 1
+    const radius = 4
 
     for (let i = 0; i < this.chartData.length; i++) {
       const progress = Phaser.Math.Clamp(this.chartData[i].value, 0, 1)
@@ -29,7 +35,11 @@ export class RiskChart {
       const x = this.chartX + i * (this.barWidth + this.barGap)
       const y = this.chartY - barHeight
 
-      this.graphics.fillRect(x, y, this.barWidth, barHeight)
+      this.graphics.fillStyle(this.scene.standartColors.red, alpha)
+      this.graphics.fillRoundedRect(x, y, this.barWidth, barHeight, radius)
+
+      this.graphics.lineStyle(strokeWidth, strokeColor, alpha)
+      this.graphics.strokeRoundedRect(x, y, this.barWidth, barHeight, radius)
     }
   }
 

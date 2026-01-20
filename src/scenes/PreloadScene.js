@@ -84,7 +84,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     this.load.image('flash_copy', 'assets/sprites/elements/flash_copy.png')
     this.load.image('camera_frame', 'assets/sprites/dev/camera_frame.png')
-    this.load.image('tuner_bg', 'assets/sprites/dev/tuner_.png')
+    this.load.image('tuner_bg', 'assets/sprites/dev/tuner_bg.png')
     // this.load.image('grid', 'assets/sprites/dev/grid.png')
     this.load.image('co', 'assets/sprites/dev/co_2.png')
     // this.load.image('bot_chat', 'assets/sprites/dev/bot_chart_4.jpg')
@@ -139,13 +139,16 @@ export default class PreloadScene extends Phaser.Scene {
     )
     this.load.image('button_tuner_big', 'assets/sprites/elements/button_tuner_big.png')
     this.load.image('button_tuner', 'assets/sprites/elements/button_tuner.png')
-    this.load.image('button_close', 'assets/sprites/elements/button_close.png')
+    this.load.image('button_close', 'assets/sprites/elements/button_close_2.png')
     this.load.image('button_reset', 'assets/sprites/elements/button_reset.png')
     this.load.image('button_settings', 'assets/sprites/elements/button_settings.png')
+    this.load.image('button_set_red', 'assets/sprites/elements/button_set_red.png')
+    this.load.image('button_set_gray', 'assets/sprites/elements/button_set_gray.png')
+    this.load.image('button_square', 'assets/sprites/elements/button_square.png')
 
     this.load.image(
       'slider_button',
-      'assets/sprites/elements/slider_button.png'
+      'assets/sprites/elements/slider_button_2.png'
     )
     // this.load.image(
     //   'button_create',
@@ -162,7 +165,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('header', 'assets/sprites/bg/header.png')
     this.load.image('skull', 'assets/sprites/elements/skull_.png')
     this.load.image('ghost', 'assets/sprites/elements/ghost.png')
-    this.load.image('volume_bar', 'assets/sprites/elements/volume_bar.png')
+    this.load.image('volume_bar', 'assets/sprites/elements/volume_bar_2.png')
+    this.load.image('slider_name_back', 'assets/sprites/elements/slider_name_back.png')
 
     // sounds
     this.load.audio('crash', 'assets/sounds/crash.mp3')

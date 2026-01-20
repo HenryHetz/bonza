@@ -8,8 +8,10 @@ export class CountdownCounter {
       .text(this.x, this.y, '', {
         // font: '60px japan', // walibi
         // fill: this.scene.textColors.red,
-        fontFamily: 'JapanRobot',
+        fontFamily: this.scene.mainFontFamily,
         fontSize: '60px',
+        // font: this.scene.mainFont,
+        // fontSize: '60px',
         fill: this.scene.textColors.red, // black
         // stroke: this.scene.textColors.black, // red
         // strokeThickness: 8

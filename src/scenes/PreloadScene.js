@@ -44,14 +44,14 @@ export default class PreloadScene extends Phaser.Scene {
       })
     this.load.once('complete', () => {
       // можно подождать для красоты (как у тебя было)
-      this.scene.start('Game')
-      // this.time.delayedCall(1000, () => {
-      //   this.scene.start('Game')
-      // })
+      // this.scene.start('Game')
+      this.time.delayedCall(1000, () => {
+        this.scene.start('Game')
+      })
     })
   }
   createScreen() {
-    this.add.image(0, 0, 'boot_bg').setOrigin(0).setAlpha(0).setScale(1)
+    this.add.image(0, 0, 'boot_bg').setOrigin(0).setAlpha(1).setScale(1)
   }
   createProgressBar() {
     let barWidth = 302
@@ -137,6 +137,7 @@ export default class PreloadScene extends Phaser.Scene {
       'button_auto_off',
       'assets/sprites/elements/button_auto_off.png'
     )
+    this.load.image('button_tuner_big', 'assets/sprites/elements/button_tuner_big.png')
     this.load.image('button_tuner', 'assets/sprites/elements/button_tuner.png')
     this.load.image('button_close', 'assets/sprites/elements/button_close.png')
     this.load.image('button_reset', 'assets/sprites/elements/button_reset.png')

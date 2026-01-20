@@ -146,12 +146,17 @@ export class Ball {
       this.fallHandler(data.load) // 
     }
     if (data.mode === 'HIT') {
-      this.bounce(data) // всё надо синхронизировать 
+      // this.onHit(data) // всё надо синхронизировать 
+      // this.fall(this.bounceHandler)
+      // this.updateEffects(data.multiplier)
+    }
+    if (data.mode === 'BOUNCE') {
+      this.onBounce(data) // всё надо синхронизировать 
       // this.fall(this.bounceHandler)
       // this.updateEffects(data.multiplier)
     }
     if (data.mode === 'FINISH') {
-      this.stop()
+      this.stop(data)
     }
     if (data.mode === 'CASHOUT') {
       this.cashoutHandler(data)
@@ -168,12 +173,17 @@ export class Ball {
     // this.clearTint()
     // this.ball.y = this.y
     this.stopTween()
+    // if (this.scene.isBonza) this.ball.y = this.y
+    // else this.ball.y = this.fujiY
+
+    this.ball.y = this.y
+
     this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
-        y: this.y,
+        // y: this.y,
         alpha: 1,
-        duration: 1000,
+        duration: 500,
         ease: 'Quad.easeOut',
       })
   }
@@ -185,15 +195,18 @@ export class Ball {
         delay: 0,
         alpha: 0,
         duration: 0,
+        // y: this.y,
         onComplete: () => {
-          this.stopTween()
-          this.ballTween =
-            this.scene.tweens.add({
-              targets: this.ball,
-              delay: 100,
-              y: this.fujiY, // уходит в фуджи
-              duration: 0,
-            })
+          if (this.scene.isBonza) this.ball.y = this.y
+          else this.ball.y = this.fujiY
+          // this.stopTween()
+          // this.ballTween =
+          //   this.scene.tweens.add({
+          //     targets: this.ball,
+          //     // delay: 100,
+          //     y: this.y, // 
+          //     duration: 0,
+          //   })
         },
       })
   }
@@ -304,65 +317,88 @@ export class Ball {
         targets: this.ball,
         y: this.hitPointY,
         duration: load.fallTime, // this.duration / 2
-        //   yoyo: true,
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
           // рисовать след
           this.trail.render(this.ball.y - 20);
         },
         onComplete: () => {
-          // this.trail.stop();
-          this.shake()
-          // плавно убрать длину хвоста
-          this.scene.tweens.add({
-            targets: this.trail,
-            alpha: 0.8,
-            duration: load.drillTime * 2, // this.duration / 2
-            // ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
-            onUpdate: (tween) => {
-              // рисовать след
-              const len = (this.ball.y - 20 - this.y + 180) * (1 - tween.progress)
-              // console.log('rush onUpdate', tween.progress, len)
-              this.trail.render(this.ball.y - 20, this.ball.y - 20 - len);
-            },
-            onComplete: () => {
-              this.trail.alpha = 1
-              this.trail.stop()
-            },
-          })
+          if (load.speed === 3) {
+            const startY = this.ball.y
+            const y = this.hitPointY + load.amount * (180 / 5)
+            // this.trail.start()
 
-
-          // надо закрашивать первую платформу в серый
-          // или красный
-          // она - самое напряжение игрока
-
-          // this.scene.platforms.removeBlock()
-
-          for (let index = 1; index <= load.amount; index++) {
             // пробиваем
-            const y = this.hitPointY + index * (180 / 5)
-            this.scene.tweens.add({
-              targets: this.ball,
-              y: y,
-              delay: load.drillTime * (index),
-              duration: load.drillTime, // this.duration / 2
-              ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
-              onComplete: () => {
-                // this.trail.render(this.ball.y - 20);
-                // if (index === load.amount) {
-                //   this.trail.stop()
-                // } else this.trail.render(this.ball.y - 20);
+            this.ballTween =
+              this.scene.tweens.add({
+                targets: this.ball,
+                y: y, // var 1
+                duration: load.drillTime, // this.duration / 2
+                // ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+                // ease: 'Sine.easeIn',
+                onComplete: () => {
+                  this.trail.render(this.ball.y - 20, this.y - 200);
+                  for (let index = 1; index <= load.amount; index++) {
+                    this.scene.platforms.removeBlock()
+                  }
+                  this.removeTrail(load.drillTime * 2, 0)
+                },
+              })
+            return
+          } else {
+            // надо закрашивать первую платформу в серый
+            // или красный
+            // она - самое напряжение игрока
+            // dev
+            this.scene.platforms.setDarkBlock(0)
 
-                // dev
-                this.scene.platforms.removeBlock()
+            for (let index = 1; index <= load.amount; index++) {
+              // пробиваем
+              const y = this.hitPointY + index * (180 / 5)
+              this.scene.tweens.add({
+                targets: this.ball,
+                y: y, // var 1
+                // alpha: 0.99, // var 2
+                delay: load.drillTime * (index),
+                duration: load.drillTime, // this.duration / 2
+                ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+                // ease: 'Sine.easeIn',
+                onStart: () => {
+                  // this.scene.platforms.setDarkBlock(index)
+                },
+                onComplete: () => {
+                  // dev
+                  if (!this.scene.isCrashed) this.scene.platforms.removeBlock()
 
-              },
-            })
+                },
+              })
+            }
+
+            this.removeTrail(load.drillTime * 2)
+            this.shake()
           }
-
-          // this.trail.stop();
         },
       })
+  }
+  removeTrail(duration, delay = 0) {
+    // плавно убрать длину хвоста
+    this.scene.tweens.add({
+      targets: this.trail,
+      alpha: 0.8,
+      delay: delay,
+      duration: duration, // this.duration / 2
+      // ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+      onUpdate: (tween) => {
+        // рисовать след
+        const len = (this.ball.y - 20 - this.y + 180) * (1 - tween.progress)
+        // console.log('rush onUpdate', tween.progress, len)
+        this.trail.render(this.ball.y - 20, this.ball.y - 20 - len);
+      },
+      onComplete: () => {
+        this.trail.alpha = 1
+        this.trail.stop()
+      },
+    })
   }
   shake() {
     // const time = Phaser.Math.Between(0.005, 0.001)
@@ -415,7 +451,8 @@ export class Ball {
       })
 
   }
-  bounce(data) {
+  onBounce(data) {
+    // console.log('ball onBounce', data)
     // stop falling
     // this.trail.stop();
     this.stopTween()
@@ -430,6 +467,7 @@ export class Ball {
       duration = 200 // надо передавать из сцены
       ease = this.easeBackIn
     }
+
     this.ballTween =
       this.scene.tweens.add({
         targets: this.ball,
@@ -446,7 +484,7 @@ export class Ball {
                 targets: this.ball,
                 y: this.y - 100,
                 // delay: delay,
-                duration: 700, // this.duration
+                duration: 500, // this.duration
                 yoyo: true,
                 ease: this.easeNewOut, // Quad Quart
                 onComplete: () => {
@@ -457,10 +495,16 @@ export class Ball {
         },
       })
   }
-  stop() {
+  stop(data) {
+    // console.log('ball stop', data.isCrashed)
     this.stopTween()
+    // здесь нужно поработать
+    if (data.isCrashed) {
+      this.removeTrail(0, 0)
+    } else this.removeTrail(100, 0)
     // this.emitter.explode(30, this.ball.x, this.ball.y)
     this.up()
+
     // dev
     this.ballTrailEmitter.emitting = false
     if (this.pulseTween) this.pulseTween.pause()
@@ -507,7 +551,7 @@ export class Ball {
 
 
 
-// var 1 bounce
+// var 1 onBounce
 // this.bouncing =
 //   this.scene.tweens.add({
 //     targets: this.ball,
@@ -532,6 +576,6 @@ export class Ball {
 //         },
 //       })
 //       // if (callback) callback()
-//       // console.log('bounce',)
+//       // console.log('onBounce',)
 //     },
 //   })

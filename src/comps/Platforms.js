@@ -154,7 +154,20 @@ export class Platforms {
             this.lastKnownMulty = data.multiplier
             this.nextMulty = data.nextMultiplier
             this.chessPhase ^= 1
-            this.onHit(data)
+            // this.onHit(data)
+            // dev
+            // this.scene.countdownCounter.set(data.count + 1)
+            // this.scene.countdownCounter.show(1)
+            return
+        }
+        if (data.mode === 'BOUNCE') {
+            // console.log('Platforms HIT data:', data)
+            // data.count = текущий шаг, который был выбит
+            // this.lastKnownStep = data.count
+            // this.lastKnownMulty = data.multiplier
+            // this.nextMulty = data.nextMultiplier
+            // this.chessPhase ^= 1
+            this.onBounce(data)
             // dev
             // this.scene.countdownCounter.set(data.count + 1)
             // this.scene.countdownCounter.show(1)
@@ -234,14 +247,14 @@ export class Platforms {
         this.blocks.shift()
         // console.log('Platforms removeBlock, remaining:', this.blocks.length)
     }
-    onHit(data) {
+    onBounce(data) {
         // if (!this.blocks.length) return
-        // console.log(data.count, 'onHit:', data)
+        // console.log(data.count, 'onBounce:', data)
         if (!data.isBonza) {
 
             const top = this.blocks[0]
             // const singleBlockHeight = this.groupTotalHeight / this.currentPattern.length
-            const removedH = top.__height * data.amount
+            const removedH = top.__height
 
             // 1) выбиваем верхний
             this.scene.tweens.add({
@@ -301,14 +314,14 @@ export class Platforms {
 
                     // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
                     this.applyPattern(next, { immediate: true })
-                    this.renderMultipliers(data.count + data.amount)
+                    this.renderMultipliers(data.count)
                     this.showBonusBlocks(this.blocks)
 
                 },
             })
         } else {
             // console.log('Platforms BONZA HIT data:', this.setContainer.y)
-            // console.log(data.count, 'onHit BONZA:', data)
+            // console.log(data.count, 'onBounce BONZA:', data)
             // bonza mode - просто обновляем числа сверху вниз
             const singleBlockHeight = this.groupTotalHeight / this.currentPattern.length
             const removedH = singleBlockHeight * data.amount
@@ -340,7 +353,7 @@ export class Platforms {
         // console.log('Platforms rerenderBlocks next pattern:', next)
         // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
         this.applyPattern(next, { immediate: true })
-        this.renderMultipliers(data.count + data.amount)
+        this.renderMultipliers(data.count) // data.count + data.amount
         this.showBonusBlocks(this.blocks)
     }
     applyPattern(patternObj, { immediate = true } = {}) {
@@ -456,7 +469,6 @@ export class Platforms {
 
         // dev
         if (stepLeft >= 5 && this.scene.isBonza) amount = 5
-
 
         return amount
     }
@@ -876,7 +888,7 @@ export class Platforms {
             // УБРАТЬ ОТСЮДА!!! 
             this.scene.events.emit('gameEvent', {
                 mode: 'BONZA',
-                amount: count,
+                amount: 3,
             })
             // this.scene.bonzaCount += count
         }
@@ -893,6 +905,14 @@ export class Platforms {
         this.recolorBlockRect(top.__rect, this.scene.standartColors.red);
         // this.recolorBlockFrame(top.__frame, this.scene.standartColors.red);
         top.__pattern.alpha = 0
+    }
+    setDarkBlock(number) {
+        // console.log('setDarkBlock', number)
+        const top = this.blocks[number || 0];
+        if (!top) return
+        this.recolorBlockRect(top.__rect, this.scene.standartColors.dark_red);
+        // this.recolorBlockFrame(top.__frame, this.scene.standartColors.red);
+        // top.__pattern.alpha = 0
     }
 
     recolorBlockRect(g, newColor) {

@@ -12,6 +12,7 @@ export class GameControlPanel {
     this.onTuner = config.onTuner
     this.onAuto = config.onAuto
     this.onSettings = config.onSettings
+    this.onSpeed = config.onSpeed
 
     this.createElements()
     this.registerHandlers()
@@ -23,7 +24,8 @@ export class GameControlPanel {
     const indent = this.scene.buttonIndent
     const nameSpacing = this.scene.buttonNameSpacing
 
-    const secondLineIndent = 120
+    const secondLineIndentX = 70
+    const secondLineIndentY = 140
     const secondLineNameSpacing = 50
 
     const labelColor = this.scene.labelColor
@@ -43,7 +45,7 @@ export class GameControlPanel {
       .setOrigin(0.5)
 
     this.stakeCounter = this.scene.add
-      .text(this.centerX, buttonY - secondLineIndent, '', {
+      .text(this.centerX, buttonY - 1.5 * this.gridUnit, '', {
         fontFamily: 'JapanRobot',
         fontSize: '40px',
         fill: this.scene.textColors.white,
@@ -62,6 +64,15 @@ export class GameControlPanel {
       })
       .setOrigin(0.5, 0).setAlign('center')
 
+    // BetStepper
+    this.betStepper = new BetStepper(
+      this.scene,
+      this.centerX,
+      this.stakeCounter.y,
+      this.scene.betValues
+    )
+
+    // Auto
     this.autoCashoutLabel = this.scene.add
       .text(this.stakeCounter.x, this.stakeCounter.y + 40, '', {
         font: labelFont,
@@ -72,36 +83,15 @@ export class GameControlPanel {
       .setAlign('center')
       .setAlpha(0)
 
-    // BetStepper
-    this.betStepper = new BetStepper(
-      this.scene,
-      this.centerX,
-      this.stakeCounter.y,
-      this.scene.betValues
-    )
 
-    // Cash Button
-    // this.buttonAction_old = this.scene.add
-    //   .image(this.centerX, buttonY, 'button_red')
-    //   .setOrigin(0.5)
-    // .setAlpha(0.5)
-    //   .setInteractive()
-    //   .on('pointerdown', () => this.onCash?.())
-    // this.buttonBlack = new ButtonGraphics(
-    //   this.scene,
-    //   this.centerX + 4,
-    //   buttonY + 6,
-    //   'black'
-    // )
 
+    // Action Button
     this.buttonAction = new ButtonGraphics(
       this.scene,
       this.centerX,
       buttonY,
       'red'
     )
-    // .setInteractive()
-    // .setAlpha(0.5)
     this.buttonAction.enableHitbox()
     this.buttonAction.on('pointerdown', () => this.onCash?.())
 
@@ -117,6 +107,8 @@ export class GameControlPanel {
       })
       .setOrigin(0.5)
       .setAlign('center')
+
+
 
     // Auto Button
     this.buttonAuto = this.scene.add
@@ -137,16 +129,6 @@ export class GameControlPanel {
       .setOrigin(0.5, 0)
       .setAlpha(1)
 
-    // this.emoLabel = this.scene.add
-    //   .text(640 - indent, buttonY - nameSpacing, 'EMO_CHAT', {
-    //     // fontFamily: 'AvenirNextCondensedBold',
-    //     // fontSize: '18px',
-    //     color: labelColor,
-    //     font: labelFont
-    //   })
-    //   .setOrigin(0.5, 0)
-    //   .setAlpha(1)
-
     this.autoCounter = this.scene.add
       .text(this.buttonAuto.x, this.buttonAuto.y, '', {
         fontFamily: 'AvenirBlack',
@@ -159,28 +141,32 @@ export class GameControlPanel {
       .setAlign('center')
       .setAlpha(1)
 
-    // Tuner Button
+
+
+    // Risk_Tuner
+    this.tunerLabel = this.scene.add
+      .text(640 - indent, buttonY - nameSpacing, 'RISK_TUNER', {
+        // fontFamily: 'AvenirNextCondensedBold',
+        // fontSize: '18px',
+        color: labelColor,
+        font: labelFont
+      })
+      .setOrigin(0.5, 0)
+      .setAlpha(1)
+
     this.buttonTuner = this.scene.add
-      .image(640 - 60, buttonY - secondLineIndent, 'button_tuner')
+      .image(640 - indent, buttonY, 'button_tuner_big')
       .setOrigin(0.5)
       .setScale(1)
       .setAlpha(1) // dev
       .setInteractive()
       .on('pointerdown', () => this.onTuner?.())
 
-    this.tunerLabel = this.scene.add
-      .text(this.buttonTuner.x, this.buttonTuner.y - secondLineNameSpacing, 'TUNER', {
-        // fontFamily: 'AvenirNextCondensedBold',
-        // fontSize: '18px',
-        // color: labelColor,
-        color: labelColor,
-        font: labelFont
-      })
-      .setOrigin(0.5, 0)
+
 
     // Setting Button
     this.buttonSettings = this.scene.add
-      .image(60, buttonY - secondLineIndent, 'button_settings')
+      .image(secondLineIndentX, buttonY - secondLineIndentY, 'button_settings')
       .setOrigin(0.5)
       .setScale(1)
       .setInteractive()
@@ -196,11 +182,24 @@ export class GameControlPanel {
       })
       .setOrigin(0.5, 0)
 
-    // Rules Button
-    // this.buttonRules = this.scene.add
-    //   .image(this.centerX, 13 * this.gridUnit, 'button_rules')
-    //   .setOrigin(0.5)
-    //   .setDepth(200)
+    // Speed Button
+    this.buttonSpeed = this.scene.add
+      .image(640 - secondLineIndentX, buttonY - secondLineIndentY, 'button_tuner')
+      .setOrigin(0.5)
+      .setScale(1)
+      .setAlpha(1) // dev
+      .setInteractive()
+      .on('pointerdown', () => this.onSpeed?.())
+
+    this.speedLabel = this.scene.add
+      .text(this.buttonSpeed.x, this.buttonSpeed.y - secondLineNameSpacing, 'SPEED', {
+        // fontFamily: 'AvenirNextCondensedBold',
+        // fontSize: '18px',
+        // color: labelColor,
+        color: labelColor,
+        font: labelFont
+      })
+      .setOrigin(0.5, 0)
   }
 
   createEvents() {
@@ -231,7 +230,7 @@ export class GameControlPanel {
       BET_CHANGED: this.onBetChanged,
       BET_ALLOWED: this.onBetAllowed,
       BET: this.onBet,
-      HIT: this.onBounce,
+      HIT: this.onHit,
       AUTO_SETTING_CHANGED: this.onAutoSetChanged,
     }
   }
@@ -296,8 +295,9 @@ export class GameControlPanel {
     this.buttonAction.setAlpha(0.7)
   }
 
-  onBounce(data) {
-    if (data.count > 0 && data.hasBet) {
+  onHit(data) {
+    // console.log('stake onHit', data)
+    if (data.hasBet) { // было так: data.count > 0 && data.hasBet
       this.updateStakeText(data.stakeValue)
       // this.scene.sounds.coin.play()
     }

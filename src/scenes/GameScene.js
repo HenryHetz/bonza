@@ -286,7 +286,18 @@ export default class GameScene extends Phaser.Scene {
     // таймеры delayedCall / addEvent
     this.time.timeScale = this.timeScale
 
-    console.log('Time Scale:', this.timeScale)
+    this.gameSpeed = this.timeScale // вообще надо менять скорость 1-2-3
+    if (this.gameSpeed == 2) this.gameSpeed = 2
+    else if (this.gameSpeed == 3) this.gameSpeed = 3
+    else this.gameSpeed = 1
+
+
+    this.events.emit('gameEvent', {
+      mode: 'SPEED_CHANGED',
+      speed: this.gameSpeed,
+    })
+
+    // console.log('Time Scale:', this.timeScale, this.gameSpeed)
   }
   // при переключении вкладки
   onAppBlur() {

@@ -145,6 +145,9 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('button_set_red', 'assets/sprites/elements/button_set_red.png')
     this.load.image('button_set_gray', 'assets/sprites/elements/button_set_gray.png')
     this.load.image('button_square', 'assets/sprites/elements/button_square.png')
+    this.load.image('button_speed_1', 'assets/sprites/elements/button_speed_1.png')
+    this.load.image('button_speed_2', 'assets/sprites/elements/button_speed_2.png')
+    this.load.image('button_speed_3', 'assets/sprites/elements/button_speed_3.png')
 
     this.load.image(
       'slider_button',

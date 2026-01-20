@@ -184,7 +184,7 @@ export class GameControlPanel {
 
     // Speed Button
     this.buttonSpeed = this.scene.add
-      .image(640 - secondLineIndentX, buttonY - secondLineIndentY, 'button_tuner')
+      .image(640 - secondLineIndentX, buttonY - secondLineIndentY, 'button_speed_1')
       .setOrigin(0.5)
       .setScale(1)
       .setAlpha(1) // dev
@@ -232,10 +232,16 @@ export class GameControlPanel {
       BET: this.onBet,
       HIT: this.onHit,
       AUTO_SETTING_CHANGED: this.onAutoSetChanged,
+      SPEED_CHANGED: this.onSpeedChanged,
     }
   }
 
   // ==== Handlers ====
+  onSpeedChanged(data) {
+    // console.log('GameControlPanel onSpeedChanged', data)
+    // можно обновить внешний вид кнопки скорости, если нужно
+    this.buttonSpeed.setTexture('button_speed_' + data.speed)
+  }
 
   onCountdown(data) {
     // this.buttonAction.setTexture('button_red')

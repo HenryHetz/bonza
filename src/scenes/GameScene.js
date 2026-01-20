@@ -140,7 +140,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     // UI SETTINGS
-    this.buttonNameSpacing = 60
+    this.buttonNameSpacing = 56
     this.buttonIndent = 100
 
     this.labelColor = this.textColors.white
@@ -210,6 +210,13 @@ export default class GameScene extends Phaser.Scene {
     })
       .setOrigin(0.5, 0)
       .setDepth(100)
+
+    this.headerBonza = this.add.image(320, 10, 'header_bonza')
+      .setOrigin(0.5, 0)
+      .setAlpha(0)
+      .setScale(1)
+      .setDepth(100)
+
 
     this.createParticles() // эммитер передается в Ball
 

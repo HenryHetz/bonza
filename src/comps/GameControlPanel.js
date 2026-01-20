@@ -24,7 +24,7 @@ export class GameControlPanel {
     const indent = this.scene.buttonIndent
     const nameSpacing = this.scene.buttonNameSpacing
 
-    const secondLineIndentX = 70
+    const secondLineIndentX = 80
     const secondLineIndentY = 140
     const secondLineNameSpacing = 50
 

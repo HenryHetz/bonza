@@ -62,7 +62,7 @@ export class DevUI {
       .setAlpha(0.8)
     // .setDepth(210)
 
-    this.slogan = this.scene.add.image(x, y + height / 2, 'exits_frame_slogan').setOrigin(0.5).setAlpha(0.8)
+    this.slogan = this.scene.add.image(x, y + height / 2, 'exits_frame_slogan').setOrigin(0.5).setAlpha(0.7)
   }
   createTunerPanel() {
     const x = 640 - 80
@@ -72,7 +72,7 @@ export class DevUI {
   createRulesFrame() {
     const x = 640 - 80
     const y = 260
-    this.scene.add.image(x, y, 'rules_frame').setOrigin(0.5, 0).setAlpha(0.8)
+    this.scene.add.image(x, y, 'rules_frame').setOrigin(0.5, 0).setAlpha(0.7)
   }
   createEvents() {
     // this.scene.events.on('gameEvent', (data) => {

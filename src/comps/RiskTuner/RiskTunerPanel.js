@@ -341,6 +341,36 @@ export class RiskTunerPanel {
       this.resetDraft()
     })
 
+    this.buttonRandom.on('pointerdown', () => {
+      const randomSetting = {
+        minPayout:
+          this.settingArrays.minPayout[
+          Phaser.Math.Between(
+            0,
+            this.settingArrays.minPayout.length - 1
+          )
+          ],
+        maxPayout:
+          this.settingArrays.maxPayout[
+          Phaser.Math.Between(
+            0,
+            this.settingArrays.maxPayout.length - 1
+          )
+          ],
+        steps:
+          this.settingArrays.steps[
+          Phaser.Math.Between(0, this.settingArrays.steps.length - 1)
+          ],
+      }
+      this.draftRiskSetting = { ...randomSetting }
+      this.previousDraftValues = { ...randomSetting }
+
+      this.setSliders(this.draftRiskSetting)
+      this.notation.update(this.draftRiskSetting)
+      this.updateChart(this.draftRiskSetting)
+      this.updateSetButton()
+    })
+
     this.buttonAction.on('pointerdown', () => {
       if (this.isDraftChanged()) {
         this.applyDraft()

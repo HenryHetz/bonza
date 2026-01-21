@@ -9,7 +9,7 @@ export class BonzaMode {
     this.logoAlpha = 0.3
 
     this.logo = scene.add.image(this.x, this.y, 'stamp').setScale(1.2).setAlpha(this.logoAlpha)
-    this.frame = scene.add.image(this.x, this.y, 'bonza_logo_frame')
+    this.frame = scene.add.image(this.x, this.y, 'bonza_logo_frame').setAlpha(0.7)
 
     this.counter = scene.add
       .text(this.x + 35, this.y - 35, this.amount, {

@@ -27,7 +27,7 @@ export class DevUI {
     const width = 140
     const height = 320
     const x = 80
-    const y = 340
+    const y = 295
 
     const g = this.scene.add.graphics()
     // console.log('frame color', width, height, color)
@@ -62,7 +62,7 @@ export class DevUI {
       .setAlpha(0.8)
     // .setDepth(210)
 
-    this.slogan = this.scene.add.image(x, y + height / 2, 'exits_frame_slogan').setOrigin(0.5).setAlpha(0.7)
+    this.slogan = this.scene.add.image(x, y, 'exits_frame_slogan').setOrigin(0.5, 0).setAlpha(0.8)
   }
   createTunerPanel() {
     const x = 640 - 80
@@ -71,8 +71,22 @@ export class DevUI {
   }
   createRulesFrame() {
     const x = 640 - 80
-    const y = 260
-    this.scene.add.image(x, y, 'rules_frame').setOrigin(0.5, 0).setAlpha(0.7)
+    const y = 295
+    this.scene.add
+      .text(x, y - 15, 'RULES', {
+        // font: '24px walibi',
+        // fill: 'white',
+        fontFamily: 'JapanRobot',
+        fontSize: '16px',
+        // fill: this.scene.textColors.white,
+        color: this.scene.labelColor,
+        // font: this.scene.labelFont
+      })
+      .setOrigin(0.5)
+      // .setAlign('left')
+      .setAlpha(0.8)
+    // .setDepth(210)
+    this.scene.add.image(x, y, 'rules_frame').setOrigin(0.5, 0).setAlpha(0.8)
   }
   createEvents() {
     // this.scene.events.on('gameEvent', (data) => {

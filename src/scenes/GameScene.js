@@ -37,7 +37,7 @@ export default class GameScene extends Phaser.Scene {
   }
   preload() { }
   init() {
-    this.bonzaCount = 0 // dev
+    this.bonzaCount = 5 // dev
     this.isBonza = this.bonzaCount > 0
 
     this.pendingBonzaAmount = 0
@@ -1131,10 +1131,13 @@ export default class GameScene extends Phaser.Scene {
   }
   initCrashIndex_local() { // old
     let random = Math.random()
-    // random = 0.999999999 // dev 
-    if (this.bonzaCount > 0) random = Phaser.Math.FloatBetween(this.minBonzaRandom, 1) // bonza
-
     console.log('random', random)
+    // random = 0.999999999 // dev 
+    if (this.bonzaCount > 0) {
+      // random *= 2 // bonza 2 - больше 1 часто, значит максимум
+      random = Phaser.Math.FloatBetween(this.minBonzaRandom, 1) // bonza 1
+      console.log('bonza random', random)
+    }
 
     let multiplier = null
     let index = 0

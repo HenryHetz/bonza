@@ -35,7 +35,7 @@ export class AutoPanel {
     this.previousValues = { ...setting }
 
     // --- Контейнер для всего UI
-    this.container = scene.add.container(0, 0).setDepth(20).setVisible(false)
+    this.container = scene.add.container(0, 0).setDepth(20).setVisible(0)
 
     this.createUI()
     this.createEvents()
@@ -45,38 +45,48 @@ export class AutoPanel {
     const { scene, container } = this
 
     // --- Фон
-    // this.bg = scene.add
-    //   .image(0, 80, 'tuner_bg')
-    //   .setOrigin(0)
-    //   .setAlpha(0)
-    //   // .setScale(1.3)
-    //   // .setTint(0x000000)
-    //   .setInteractive()
+    this.bg = scene.add
+      .image(0, 0, 'auto_bg') //  tuner_bg
+      .setOrigin(0)
+      .setAlpha(1)
+      .setInteractive()
 
     // var 2
-    this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
+    // this.bg = scene.add.rectangle(0, 0, 640, 1120, 0x000000, 0.8).setOrigin(0);
 
     // --- Заголовок
     this.naming = scene.add
-      .text(scene.sceneCenterX, scene.gridUnit * 2, '#AUTO_BETTING', {
-        fontSize: '38px',
-        color: '#FDD41D',
-        fontFamily: 'walibi',
+      .text(scene.sceneCenterX, 120, 'AUTO_SET', {
+        fontFamily: this.scene.mainFontFamily,
+        fontSize: '40px',
+        fill: this.scene.textColors.black, // black
       })
       .setOrigin(0.5)
 
     // --- Нотация/лейблы
+    // this.notation = scene.add
+    //   .text(
+    //     scene.sceneCenterX,
+    //     scene.gridUnit * 2.6,
+    //     'Selecting "0" means no action',
+    //     {
+    //       fontSize: '24px',
+    //       color: '#FDD41D', // жёлтый '#FDD41D'
+    //       fontFamily: 'AvenirNextCondensedBold',
+    //     }
+    //   )
+    //   .setOrigin(0.5)
+    //   .setAlign('center')
+
     this.notation = scene.add
-      .text(
-        scene.sceneCenterX,
-        scene.gridUnit * 2.6,
-        'Selecting "0" means no action',
-        {
-          fontSize: '24px',
-          color: '#FDD41D', // жёлтый '#FDD41D'
-          fontFamily: 'AvenirNextCondensedBold',
-        }
-      )
+      .text(scene.sceneCenterX, 180, 'Selecting "0" means no action', {
+        // fontSize: '24px',
+        // color: '#FDD41D',
+        // fontFamily: 'AvenirNextCondensedBold',
+        fontFamily: this.scene.labelFontFamily,
+        fontSize: '20px',
+        color: this.scene.textColors.dark_gray,
+      })
       .setOrigin(0.5)
       .setAlign('center')
 
@@ -100,18 +110,19 @@ export class AutoPanel {
     //   )
     // }
 
-    const displayY = scene.gridUnit * 5.5
+    const displayY = scene.gridUnit * 4.5
     const displayGap = 80
     const labelGap = 60
 
     // Крупные цифры
     this.displayRounds = scene.add
-      .text(scene.sceneCenterX, displayY + displayGap, '', {
-        fontSize: '80px',
-        color: 'white',
-        fontFamily: 'walibi',
+      .text(scene.sceneCenterX, displayY + displayGap, '990', {
+        fontFamily: this.scene.labelFontFamily,
+        fontSize: '60px',
+        color: this.scene.textColors.dark_gray,
       })
       .setOrigin(0.5)
+      .setAlpha(0)
 
     this.displayRoundsLabel = scene.add
       .text(this.displayRounds.x, this.displayRounds.y - labelGap, 'ROUNDS', {
@@ -120,6 +131,7 @@ export class AutoPanel {
         color: '#13469A',
       })
       .setOrigin(0.5)
+      .setAlpha(0)
 
     this.displayRoundsLabelPlay = this.scene.add
       .image(
@@ -137,6 +149,7 @@ export class AutoPanel {
         fontFamily: 'walibi',
       })
       .setOrigin(0.5)
+      .setAlpha(0)
     // .setDepth(20)
 
     this.displayCashoutLabel = scene.add
@@ -151,36 +164,7 @@ export class AutoPanel {
         }
       )
       .setOrigin(0.5)
-    // --- Чарт
-    const chartHeight = 240
-    const barWidth = 160
-
-    // this.chart = new Chart(scene, 0, this.displayRounds.y + chartHeight / 2)
-    // // два широких столбика строго под цифрами:
-    // this.chart.configure({
-    //   barsCount: 2,
-    //   barWidth,
-    //   chartHeight,
-    //   anchors: [this.displayRounds.x, this.displayCashout.x], // центры столбиков
-    // })
-
-    // this.cashoutArc = new CashoutArc(this.scene, {
-    //   x: this.displayCashout.x,
-    //   y: this.displayCashout.y - 6,
-    //   radius: 150,
-    //   thickness: 22,
-    //   min: 0,
-    //   max: 50,
-    //   startDeg: 200,
-    //   sweepDeg: 220,
-    //   anticlockwise: true, // чтобы росло «слева → вправо» по верхней дуге
-    //   trackColor: 0x0a2a4f,
-    //   trackAlpha: 0.28,
-    //   fillColor: 0xfdd41d,
-    //   duration: 500,
-    //   ease: 'Back.easeOut',
-    //   depth: 1, // внутри контейнера под текстом
-    // })
+      .setAlpha(0)
 
     // --- Слайдеры
     this.slider1 = new Slider(
@@ -212,33 +196,10 @@ export class AutoPanel {
 
     // --- Кнопки
     this.buttonClose = scene.add
-      .image(scene.buttonIndent, scene.buttonY, 'button_close')
+      .image(scene.buttonIndent - 20, scene.buttonY, 'button_close')
       .setOrigin(0.5)
-      .setScale(0.8)
+      .setScale(1)
       .setInteractive()
-
-    this.buttonReset = scene.add
-      .image(640 - scene.buttonIndent, scene.buttonY, 'button_reset')
-      .setOrigin(0.5)
-      .setScale(0.8)
-      .setInteractive()
-
-    this.buttonAction = new ButtonGraphics(
-      this.scene,
-      scene.sceneCenterX,
-      scene.buttonY,
-      'yellow'
-    ).setAlpha(0.6)
-
-    this.buttonAction.enableHitbox()
-
-    this.buttonActionLabel = this.scene.add
-      .text(this.buttonAction.x, this.buttonAction.y, 'SET', {
-        font: '40px walibi',
-        fill: 'black',
-      })
-      .setOrigin(0.5)
-      .setAlign('center')
 
     this.textClose = scene.add
       .text(
@@ -252,39 +213,121 @@ export class AutoPanel {
         }
       )
       .setOrigin(0.5, 0)
+      .setAlpha(0)
 
-    this.textReset = scene.add
+    // reset button
+    this.buttonReset = scene.add
+      .image(scene.sceneCenterX - 120, scene.buttonY, 'button_square')
+      .setOrigin(0.5)
+      .setScale(1)
+      .setInteractive()
+    // .setFlipX(true)
+    // .setScale(1)
+
+    this.labelReset = scene.add
       .text(
         this.buttonReset.x,
-        this.buttonReset.y - scene.buttonNameSpacing,
-        'RESET',
+        this.buttonReset.y,
+        'RE-\nSET',
         {
-          fontFamily: 'AvenirNextCondensedBold',
-          fontSize: '18px',
-          color: '#13469A',
+          fontFamily: this.scene.mainFontFamily,
+          fontSize: '24px',
+          fill: this.scene.textColors.black, // black
         }
       )
-      .setOrigin(0.5, 0)
+      .setOrigin(0.5)
+
+    // main
+    // this.buttonAction = new ButtonGraphics(
+    //   this.scene,
+    //   scene.sceneCenterX,
+    //   scene.buttonY,
+    //   'yellow'
+    // ).setAlpha(0.6)
+
+    // this.buttonAction.enableHitbox()
+
+    // this.buttonActionLabel = this.scene.add
+    //   .text(this.buttonAction.x, this.buttonAction.y, 'SET', {
+    //     font: '40px walibi',
+    //     fill: 'black',
+    //   })
+    //   .setOrigin(0.5)
+    //   .setAlign('center')
+
+    // random button
+    this.buttonRandom = scene.add
+      .image(scene.sceneCenterX + 120, scene.buttonY, 'button_square')
+      .setOrigin(0.5)
+      .setScale(1)
+      .setInteractive()
+    // .setFlipX(true)
+    // .setScale(1)
+
+    this.labelRandom = scene.add
+      .text(
+        this.buttonRandom.x,
+        this.buttonRandom.y,
+        'RAN\nDOM',
+        {
+          fontFamily: this.scene.mainFontFamily,
+          fontSize: '24px',
+          fill: this.scene.textColors.black, // black
+        }
+      )
+      .setOrigin(0.5)
+      .setAlpha(0)
+
+
+    // Главная кнопка действия
+    this.buttonActionAlpha = 1
+
+    this.buttonAction = scene.add
+      .image(scene.sceneCenterX, scene.buttonY, 'button_set_gray')
+      .setOrigin(0.5)
+      .setInteractive()
+      .setAlpha(this.buttonActionAlpha)
+
+    // this.buttonAction = new ButtonGraphics(
+    //   this.scene,
+    //   scene.sceneCenterX,
+    //   scene.buttonY,
+    //   'yellow'
+    // ).setAlpha(0.6)
+
+    // this.buttonAction.enableHitbox()
+    // this.buttonAction.on('pointerdown', () => this.onCash?.())
+
+    this.buttonActionLabel = this.scene.add
+      .text(this.buttonAction.x, this.buttonAction.y, 'SET', {
+        // font: '40px walibi',
+        // fill: 'black',
+        fontFamily: this.scene.mainFontFamily,
+        fontSize: '40px',
+        fill: this.scene.textColors.black, // black
+      })
+      .setOrigin(0.5)
+      .setAlign('center')
+
 
     // --- Добавляем в контейнер
     container.add([
       this.bg,
       this.naming,
       this.notation,
-      // this.chart.graphics,
-      // this.cashoutArc.gTrack,
-      // this.cashoutArc.gFill,
       this.displayRounds,
       this.displayRoundsLabel,
       this.displayRoundsLabelPlay,
       this.displayCashout,
       this.displayCashoutLabel,
       this.buttonClose,
-      this.textClose,
+      // this.textClose,
       this.buttonReset,
-      this.textReset,
+      this.labelReset,
       this.buttonAction,
       this.buttonActionLabel,
+      this.buttonRandom,
+      this.labelRandom,
       this.slider1.container,
       this.slider2.container,
       this.slider3.container,
@@ -384,7 +427,14 @@ export class AutoPanel {
   }
 
   updateCreateButton() {
-    this.buttonAction.setAlpha(this.isDraftChanged() ? 1 : 0.7)
+    // this.buttonAction.setAlpha(this.isDraftChanged() ? 1 : 0.7)
+    if (this.isDraftChanged()) {
+      this.buttonAction.setTexture('button_set_red')
+      // this.buttonActionLabel.setText('SET')
+    } else {
+      this.buttonAction.setTexture('button_set_gray')
+      // this.buttonActionLabel.setText('NO CHANGES')
+    }
   }
 
   applyDraft() {

@@ -78,10 +78,6 @@ export class RiskTunerPanel {
       })
       .setOrigin(0.5)
 
-    // Картинка датчика / тахометр
-    this.tachometer = scene.add.image(scene.sceneCenterX, 260, 'risk_tuner_panel')
-      .setOrigin(0.5)
-      .setScale(1.5)
     // --- Нотация
     this.notation = scene.add
       .text(scene.sceneCenterX - 140, 380, '', {
@@ -93,6 +89,21 @@ export class RiskTunerPanel {
         color: this.scene.textColors.dark_gray,
       })
       .setOrigin(0, 0)
+
+    // Картинка датчика / тахометр
+    this.tachometer = scene.add.image(scene.sceneCenterX, 260, 'risk_tuner_panel_big')
+      .setOrigin(0.5)
+      .setScale(1)
+
+    this.tachometerArrow = scene.add.image(this.tachometer.x, this.tachometer.y, 'risk_tuner_panel_arraw').setOrigin(0.5)
+
+    this.tachometerNaming = scene.add
+      .text(this.tachometer.x, this.tachometer.y + 72, 'EASY', {
+        fontFamily: this.scene.mainFontFamily,
+        fontSize: '20px',
+        fill: this.scene.textColors.red, // black
+      })
+      .setOrigin(0.5)
 
     this.notation.update = (setting) => {
       const lines = [
@@ -258,6 +269,8 @@ export class RiskTunerPanel {
       this.bg,
       this.naming,
       this.tachometer,
+      this.tachometerArrow,
+      this.tachometerNaming,
       this.notation,
       this.chart.graphics,
       this.buttonClose,
@@ -327,9 +340,7 @@ export class RiskTunerPanel {
       this.previousDraftValues[key] = discreteValue
 
       // === Обновляем UI ===
-      this.notation.update(this.draftRiskSetting)
-      this.updateChart(this.draftRiskSetting)
-      this.updateSetButton()
+      this.updateUI(this.draftRiskSetting)
     })
 
     // --- Кнопки
@@ -365,10 +376,7 @@ export class RiskTunerPanel {
       this.draftRiskSetting = { ...randomSetting }
       this.previousDraftValues = { ...randomSetting }
 
-      this.setSliders(this.draftRiskSetting)
-      this.notation.update(this.draftRiskSetting)
-      this.updateChart(this.draftRiskSetting)
-      this.updateSetButton()
+      this.updateUI(this.draftRiskSetting)
     })
 
     this.buttonAction.on('pointerdown', () => {
@@ -415,10 +423,7 @@ export class RiskTunerPanel {
     this.draftRiskSetting = { ...this.defaultRiskSetting }
     this.previousDraftValues = { ...this.defaultRiskSetting }
 
-    this.setSliders(this.draftRiskSetting)
-    this.notation.update(this.draftRiskSetting)
-    this.updateChart(this.draftRiskSetting)
-    this.updateSetButton()
+    this.updateUI(this.draftRiskSetting)
   }
 
   getNormalizedFromArray(array, value) {
@@ -452,11 +457,99 @@ export class RiskTunerPanel {
       this.draftRiskSetting = { ...this.currentRiskSetting }
       this.previousDraftValues = { ...this.currentRiskSetting }
 
-      this.setSliders(this.draftRiskSetting)
-      this.notation.update(this.draftRiskSetting)
-      this.updateChart(this.draftRiskSetting)
-      this.updateSetButton()
+      this.updateUI(this.currentRiskSetting)
     }
+  }
+
+  updateUI(setting) {
+    this.notation.update(setting)
+    this.updateChart(setting)
+    this.setSliders(setting)
+    this.updateSetButton()
+    // dev
+
+    this.updateTachometer(setting)
+  }
+  updateTachometer(setting) {
+    // console.log('updateTachometer', setting)
+    // от 0.75 (min 1.01) до 4.5 (max 1000)
+    // angle is depend on min, max & steps
+    // higher max & higher min = higher angle
+    // less steps = higher angle
+
+    const minAngle = 0.1
+    const maxAngle = 4
+
+    const stepIndex = this.settingArrays.steps.indexOf(setting.steps)
+    const minIndex = this.settingArrays.minPayout.indexOf(setting.minPayout)
+    const maxIndex = this.settingArrays.maxPayout.indexOf(setting.maxPayout)
+
+    const volatility = ((1 - stepIndex / (this.settingArrays.steps.length - 1)) +
+      (minIndex / (this.settingArrays.minPayout.length - 1)) +
+      (maxIndex / (this.settingArrays.maxPayout.length - 1))) / 3
+
+    const volatilityNaming = [
+      'ZEN',
+      'CHILL',
+      'SPICE',
+      'BOLD',
+      'GUTS',
+      'GRIT',
+      'SAVAGE',
+      'BRUTAL',
+      'MAD',
+      'INSANE',
+    ]
+    // назвать уровень волатильности
+    const volIndex = Math.floor(volatility * (volatilityNaming.length - 1))
+    const vName = volatilityNaming[volIndex]
+    const angle = minAngle + volatility * (maxAngle - minAngle)
+
+    // console.log('updateTachometer', volatility, volIndex, vName, angle)
+
+    // стрелка
+    this.setTahometerAngle(angle)
+    // this.tachometerArrow.setRotation(angle)
+
+    // название
+    this.tachometerNaming.setText(vName)
+  }
+  setTahometerAngle(target) {
+    const base = 0;
+    const range = 4;   // 4
+    const dir = +1;       // +1 или -1
+    const TWO_PI = Math.PI * 2;
+
+    // целевая позиция по дуге (0..4)
+    const tgtS = Phaser.Math.Clamp(target, 0, range);
+
+    // текущая rotation -> текущая позиция s по дуге
+    let rel = this.tachometerArrow.rotation - base; // относительный угол
+    // приводим rel к эквиваленту, который ближе всего к нашей "ветке" дуги
+    // (чтобы s получилось в районе [0..range], а не где-то около ±2π)
+    while (rel < -Math.PI) rel += TWO_PI;
+    while (rel > Math.PI) rel -= TWO_PI;
+
+    // переводим rel в s с учётом направления дуги
+    let curS = dir * rel;
+
+    // дотягиваем curS в коридор около [0..range], добавляя/вычитая 2π в параметре
+    // (потому что rotation мог накопиться твинами)
+    while (curS < 0) curS += TWO_PI;
+    while (curS > range) curS -= TWO_PI;
+
+    const state = { s: curS };
+
+    this.tachometerArrowAngleTween?.stop();
+    this.tachometerArrowAngleTween = this.scene.tweens.add({
+      targets: state,
+      s: tgtS,
+      duration: 200,
+      ease: 'Cubic.easeOut',
+      onUpdate: () => {
+        this.tachometerArrow.rotation = base + dir * state.s;
+      },
+    });
   }
 
   makeChartBarsFromSettings(setting) {

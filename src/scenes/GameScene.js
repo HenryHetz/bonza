@@ -170,6 +170,21 @@ export default class GameScene extends Phaser.Scene {
   create() {
     // this.game.events.on('blur', () => this.onAppBlur())
     // this.game.events.on('focus', () => this.onAppFocus())
+    this.cam = this.cameras.main
+
+    const cm = this.cam.postFX.addColorMatrix()
+    cm.desaturateLuminance();
+    cm.hue(110);
+    cm.saturate(0.35);
+    // this.cam.postFX.addGlow()
+
+    this.crt = this.plugins.get('rexcrtpipelineplugin').add(this.cam, {
+      warpX: 0.2,
+      warpY: 0.2,
+      scanLineStrength: 0.2,
+      scanLineWidth: 1024
+    })
+    this.crt.active = false;
 
     this.background = new Background(this)
     // dev
@@ -237,7 +252,7 @@ export default class GameScene extends Phaser.Scene {
       onCash: () => this.handleButtonClick(),
       onTuner: () => this.riskTuner.show(true),
       onAuto: () => this.autoSetting.show(true, this.currentAutoSetting),
-      onSettings: () => this.setTimeScale(1),
+      onSettings: () => this.toggleCRT(),
       onSpeed: () => this.setTimeScale(1),
     })
 
@@ -282,6 +297,11 @@ export default class GameScene extends Phaser.Scene {
         .setAlpha(1)
         .setScale(1)
         .setDepth(this.cameraManager.widget.depth + 1)
+  }
+  // toggle
+  toggleCRT() {
+    this.crt.active = !this.crt.active;
+    // this.crt.enabled = on;
   }
   setTimeScale(value) {
     this.timeScale += value

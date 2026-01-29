@@ -1,3 +1,4 @@
+import { on } from 'ws';
 import { BallTrail } from './BallTrail.js';
 
 export class Ball {
@@ -49,6 +50,7 @@ export class Ball {
     //   onUpdate: () => this.redraw()
     // });
 
+    this.state = 'idle'
     this.isActive = false
     this.ballTween = null
 
@@ -156,23 +158,119 @@ export class Ball {
       // this.updateEffects(data.multiplier)
     }
     if (data.mode === 'FINISH') {
-      this.stop(data)
+      // this.stop(data)
+      this.state = 'idle'
     }
     if (data.mode === 'CASHOUT') {
       this.cashoutHandler(data)
     }
+    if (data.mode === 'CRASH') {
+      this.crashHandler(data)
+    }
+
+  }
+  crashHandler(data) {
+    console.log('crashHandler', data)
+    this.isActive = false
+
+    this.stopTween()
+    this.removeTrail(0, 0)
+    this.hide()
   }
   cashoutHandler(data) {
-    // console.log('cashoutHandler', data)
-    // this.stopTween() - надо иначе
-    this.isActive = false
-    // this.ball.setFillStyle(this.scene.standartColors.dark_gray) // white
-    // this.ball.alpha = 0
+    console.log('cashoutHandler', data)
+    // надо медленно останавливать шар, если он уже падает на платформу
+    // коснулся - пересчёт ситуации краш или нет
+    // не коснулся - просто рассыпался/растворился
+    // this.stopTween()
+    if (data.method === 'auto') {
+      // this.hide()
+      // this.pulse()
+      return
+    }
+
+    if (this.state === 'falling') {
+      this.stopTween()
+      this.removeTrail(200, 0)
+      // посчитаем, коснётся ли шар платформы за оставшееся время
+      const distToGo = this.hitPointY - this.ball.y
+      const totalDist = this.distanceY
+      const timeToGo = (distToGo / totalDist) * this.duration
+      console.log('cashoutHandler distToGo', distToGo)
+      // вообще нам надо понимать когда пришёл ответ от сервера о кэшауте
+      // а потом показывать краш или нет
+      // dev
+      let ballMoveDistance = 100
+      if (distToGo < ballMoveDistance) ballMoveDistance = distToGo
+
+      // return
+      this.ballTween =
+        this.scene.tweens.add({
+          targets: this.ball,
+          y: this.ball.y + ballMoveDistance,
+          alpha: 0,
+          duration: this.duration,
+          ease: 'Quad.easeOut',
+          onComplete: () => {
+            // dev
+            if (ballMoveDistance < 100) {
+              // искры показать...
+              // this.emitter.explode(30, this.ball.x, this.ball.y)
+
+            }
+            this.hide()
+          }
+        })
+    } else {
+      // this.ballTween =
+      this.scene.tweens.add({
+        targets: this.ball,
+        alpha: 0,
+        duration: this.duration,
+        ease: 'Quad.easeOut',
+        onComplete: () => {
+          this.hide()
+
+        }
+      })
+    }
+
+  }
+  pulse() {
+    this.stopTween()
+    this.ballTween =
+      this.scene.tweens.add({
+        targets: this.ball,
+        // scale: 1.1,
+        alpha: 0.8,
+        duration: 50,
+        ease: 'Quad.easeOut',
+        yoyo: true,
+        repeat: 1,
+        onComplete: () => {
+          this.ball.scale = 1
+        }
+      })
+  }
+  stop(data) {
+    // console.log('ball stop', data.isCrashed)
+    this.stopTween()
+    // здесь нужно поработать
+    // if (data.isCrashed) {
+    //   this.removeTrail(0, 0)
+    // } else this.removeTrail(100, 0)
+    // // this.emitter.explode(30, this.ball.x, this.ball.y)
+    // this.hide()
+
+    // dev
+    // this.ballTrailEmitter.emitting = false
+    // if (this.pulseTween) this.pulseTween.pause()
   }
   reset() {
     // this.clearTint()
     // this.ball.y = this.y
     this.stopTween()
+    this.removeTrail(0, 0)
     // if (this.scene.isBonza) this.ball.y = this.y
     // else this.ball.y = this.fujiY
 
@@ -187,7 +285,7 @@ export class Ball {
         ease: 'Quad.easeOut',
       })
   }
-  up() {
+  hide() {
     this.stopTween()
     this.ballTween =
       this.scene.tweens.add({
@@ -308,9 +406,11 @@ export class Ball {
       })
   }
   rush(load) {
-    this.stopTween()
+    this.state = 'rushing'
 
+    this.stopTween()
     this.trail.start();
+    this.ball.alpha = 1
 
     this.ballTween =
       this.scene.tweens.add({
@@ -407,14 +507,13 @@ export class Ball {
     this.scene.cameras.main.shake(duration, 0.005)
     // this.trail.render(this.ball.y);
   }
-  drawShadow(y, progress) {
-    // console.log('drawShadow', y, progress)
-  }
   fall(callback) {
+    // this.state = 'falling'
     this.stopTween()
     // if (!this.isActive) return
     // this.trail.start();
     // console.log('ball fall start', this.scene.elapsedSec.toFixed(2))
+    this.ball.alpha = 1
 
     this.ballTween =
       this.scene.tweens.add({
@@ -427,6 +526,7 @@ export class Ball {
         onComplete: () => {
           // this.trail.start();
           // console.log('ball fall faze 2', this.scene.elapsedSec.toFixed(2))
+          this.state = 'falling'
 
           this.scene.tweens.add({
             targets: this.ball,
@@ -452,6 +552,7 @@ export class Ball {
 
   }
   onBounce(data) {
+    this.state = 'bouncing'
     // console.log('ball onBounce', data)
     // stop falling
     // this.trail.stop();
@@ -495,20 +596,7 @@ export class Ball {
         },
       })
   }
-  stop(data) {
-    // console.log('ball stop', data.isCrashed)
-    this.stopTween()
-    // здесь нужно поработать
-    if (data.isCrashed) {
-      this.removeTrail(0, 0)
-    } else this.removeTrail(100, 0)
-    // this.emitter.explode(30, this.ball.x, this.ball.y)
-    this.up()
 
-    // dev
-    this.ballTrailEmitter.emitting = false
-    if (this.pulseTween) this.pulseTween.pause()
-  }
   stopTween() {
     if (this.ballTween) this.ballTween.stop()
   }

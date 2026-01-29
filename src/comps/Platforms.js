@@ -181,9 +181,13 @@ export class Platforms {
             return
         }
 
-        if (data.mode === 'FINISH') {
+        if (data.mode === 'CRASH') {
             this.setRedTop(0)
-
+            return
+        }
+        if (data.mode === 'FINISH') {
+            // this.setRedTop(0)
+            // что делаем?
             return
         }
     }
@@ -251,75 +255,54 @@ export class Platforms {
         // if (!this.blocks.length) return
         // console.log(data.count, 'onBounce:', data)
         if (!data.isBonza) {
-
+            // обычный режим
             const top = this.blocks[0]
             // const singleBlockHeight = this.groupTotalHeight / this.currentPattern.length
             const removedH = top.__height
 
-            // 1) выбиваем верхний
-            this.scene.tweens.add({
-                targets: top.list[0],
-                // y: top.y + 10,
-                alpha: 0,
-                delay: 0,
-                duration: 50,
-                onComplete: () => {
-                    // top.destroy()
-                    this.removeBlock()
-
-                    // this.setNextMulty(data.count + 1)
-                    // 4) выбираем новый паттерн (transitions позже)
-                    // const next = this.pickNextPattern(this.currentPatternId)
-                    // // const next = this.currentPattern // dev
-                    // // console.log(this.currentPatternId, 'Next pattern:', next)
-                    // // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
-                    // this.applyPattern(next, { immediate: true })
-                    // this.renderMultipliers(hitStep + 1)
-                }
-            })
-
-            // 2) удаляем из массива
-            // for (let index = 0; index < data.amount; index++) {
-            //     this.blocks.shift()
-            // }
-
-            // this.blocks.shift()
-
-
-
-            let patternSwitched = false
-
-            // 3) подтягиваем оставшиеся вверх (визуально)
-            this.scene.tweens.add({
-                targets: this.setContainer,
-                y: this.setContainer.y - removedH,
-                delay: 50,
-                duration: 200, //  Math.max(60, Math.floor(this.duration * 0.25))
-                // ease: 'Back.easeInOut', // Cubic Back.easeInOut
-                ease: this.easeBackInOut,
-                onUpdate: (tween) => {
-                    // 0.45–0.6 — зона максимальной скорости / минимального внимания
-                    // if (!patternSwitched && tween.progress > 0.95) {
-                    //     patternSwitched = true
-                    //     const next = this.pickNextPattern()
-                    //     this.applyPattern(next, { immediate: true })
-                    //     this.renderMultipliers(hitStep + 1)
-                    // }
-                },
-                onComplete: () => {
-                    this.setContainer.y = 0
-
-                    // не обязательно каждый раз выбирать из карты и менять паттерн!
-                    const next = this.pickNextPattern(this.currentPatternId) // this.currentPatternId
-
-                    // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
-                    this.applyPattern(next, { immediate: true })
-                    this.renderMultipliers(data.count)
-                    this.showBonusBlocks(this.blocks)
-
-                },
-            })
+            if (this.scene.gameSpeed < 3) {
+                // норм скорость
+                // 1) выбиваем верхний
+                this.scene.tweens.add({
+                    targets: top.list[0],
+                    // y: top.y + 10,
+                    alpha: 0,
+                    delay: 0,
+                    duration: 50,
+                    onComplete: () => {
+                        this.removeBlock()
+                    }
+                })
+                // 2) подтягиваем оставшиеся вверх (визуально)
+                this.scene.tweens.add({
+                    targets: this.setContainer,
+                    y: this.setContainer.y - removedH,
+                    delay: 50,
+                    duration: 200, //  Math.max(60, Math.floor(this.duration * 0.25))
+                    // ease: 'Back.easeInOut', // Cubic Back.easeInOut
+                    ease: this.easeBackInOut,
+                    onComplete: () => {
+                        this.setContainer.y = 0
+                        this.handlePattern(data)
+                    },
+                })
+            } else {
+                // не выбиваем верхний и не двигаем стек
+                this.scene.tweens.add({
+                    targets: this.setContainer,
+                    // y: this.setContainer.y - removedH,
+                    delay: 200,
+                    duration: 0, //  Math.max(60, Math.floor(this.duration * 0.25))
+                    // ease: 'Back.easeInOut', // Cubic Back.easeInOut
+                    ease: this.easeBackInOut,
+                    onComplete: () => {
+                        this.setContainer.y = 0
+                        this.handlePattern(data)
+                    },
+                })
+            }
         } else {
+            // бонза-режим
             // console.log('Platforms BONZA HIT data:', this.setContainer.y)
             // console.log(data.count, 'onBounce BONZA:', data)
             // bonza mode - просто обновляем числа сверху вниз
@@ -341,6 +324,15 @@ export class Platforms {
                 },
             })
         }
+    }
+    handlePattern(data) {
+        // не обязательно каждый раз выбирать из карты и менять паттерн!
+        const next = this.pickNextPattern(this.currentPatternId) // this.currentPatternId
+
+        // 5) восстанавливаем сет и перерисовываем числа, начиная со следующего шага
+        this.applyPattern(next, { immediate: true })
+        this.renderMultipliers(data.count)
+        this.showBonusBlocks(this.blocks)
     }
     rerenderBlocks(data) {
         // не обязательно каждый раз выбирать из карты и менять паттерн!
@@ -472,7 +464,7 @@ export class Platforms {
 
         return amount
     }
-    __pickNextPattern(prevId) {
+    pickNextPattern_old(prevId) {
         let candidates = this.compiledMap.list.filter((p) => p.blocks >= 2)
         // return candidates[0] // dev
 
@@ -507,7 +499,7 @@ export class Platforms {
     // -----------------------
     // Blocks visuals
     // -----------------------
-    createBlockRect(width, height, color) {
+    createBlockRect_old(width, height, color) {
         const g = this.scene.add.graphics();
 
         // const isWhite = ((index + this.chessPhase) % 2 === 0);
@@ -526,6 +518,44 @@ export class Platforms {
 
         return g;
     }
+    createBlockRect(width, height, color) {
+        const g = this.scene.add.graphics()
+        const frameThickness = 3
+        const x = -width / 2 + frameThickness
+        const y = 0 + frameThickness
+
+        // --- параметры свечения ---
+        const glowColor = 0xffffff       // цвет свечения
+        const glowAlpha = 0.08            // общая интенсивность
+        const glowSteps = 3               // сколько слоёв
+        const glowStepPx = 3              // насколько расширяется каждый слой
+
+        // --- свечение (рисуем ПЕРВЫМ) ---
+        // for (let i = glowSteps; i > 0; i--) {
+        //     const pad = i * glowStepPx
+        //     g.fillStyle(glowColor, glowAlpha / i)
+        //     g.fillRect(
+        //         x - pad,
+        //         y - pad,
+        //         width + pad * 2,
+        //         height + pad * 2
+        //     )
+        // }
+
+        // --- основной прямоугольник ---
+        g.fillStyle(color, 1)
+        g.fillRoundedRect(x, y, width - frameThickness * 2, height - frameThickness * 2, frameThickness)
+
+        // метаданные
+        g.__frameThickness = frameThickness
+        g.__width = width
+        g.__height = height
+        g.__x = x
+        g.__y = y
+        g.__color = color
+
+        return g
+    }
 
     createBlockFrame(width, height, color) {
         const g = this.scene.add.graphics()
@@ -534,7 +564,7 @@ export class Platforms {
         // параметры стиля
         const strokeWidth = 4
         const strokeColor = this.scene.standartColors.black // color ? color : 
-        const alpha = 1
+        const alpha = 0
 
         g.__x = -width / 2 + strokeWidth / 2;
         g.__y = 0 + strokeWidth / 2;
@@ -679,7 +709,7 @@ export class Platforms {
         })
 
     }
-    __showBonusBlocks() {
+    showBonusBlocks_old() {
         let count = 0
         const delay = 80 // 70 60
         const half = 120   // 100 100
@@ -918,7 +948,8 @@ export class Platforms {
     recolorBlockRect(g, newColor) {
         g.clear();
         g.fillStyle(newColor, 1);
-        g.fillRect(g.__x, g.__y, g.__width, g.__height);
+        // fillRect
+        g.fillRoundedRect(g.__x, g.__y, g.__width - g.__frameThickness * 2, g.__height - g.__frameThickness * 2, g.__frameThickness);
         g.__color = newColor;
     }
     recolorBlockFrame(g, newColor) {

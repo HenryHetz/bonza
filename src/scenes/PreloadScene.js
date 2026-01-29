@@ -9,10 +9,6 @@ export default class PreloadScene extends Phaser.Scene {
     this.createProgressBar()
   }
   preload() {
-    // const loadingBar = new LoadingBar(this);
-    // dev
-    this.load.plugin('rexcrtpipelineplugin', 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexcrtpipelineplugin.min.js', true);
-
     this.preloadAssets()
 
     // так шрифты гарантировано не загружаются

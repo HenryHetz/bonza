@@ -29,8 +29,20 @@ export class FSM {
     this.emitChange()
   }
 
-  toFinish() {
+  toCrash() {
     if (this.state !== 'START') return
+    this.state = 'CRASH'
+    this.emitChange()
+  }
+
+  toCashout() {
+    if (this.state !== 'START') return
+    this.state = 'CASHOUT'
+    this.emitChange()
+  }
+
+  toFinish() {
+    // if (this.state !== 'START') return
     this.state = 'FINISH'
     this.emitChange()
   }

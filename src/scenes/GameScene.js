@@ -9,8 +9,6 @@ import { DEFAULT_GAME_CONFIG } from '../constants/defaultGameConfig'
 import { Background } from '../comps/Background'
 import { RiskTunerPanel } from '../comps/RiskTuner/RiskTunerPanel'
 import { AutoPanel } from '../comps/Auto/AutoPanel'
-
-import { CashoutChart } from '../comps/CashoutChart.js'
 import { BetValues } from '../comps/Bet/BetValues'
 
 import { RiskSettingNotice } from '../comps/RiskSettingNotice'
@@ -18,18 +16,17 @@ import { BonzaMode } from '../comps/BonzaMode'
 import { CountdownCounter } from '../comps/CountdownCounter'
 import { MoneyCounter } from '../comps/MoneyCounter'
 import { ModeLabel } from '../comps/ModeLabel'
-import { Skull } from '../comps/Skull'
+
 import { Ball } from '../comps/Ball'
 import { Platforms } from '../comps/Platforms'
 import { FSM } from '../comps/FSM'
 import { GameControlPanel } from '../comps/GameControlPanel'
-// import { on } from 'ws'
 
+// dev
 import EmoChat from '../comps//EmoChat.js';
 import { DevUI } from '../comps/DevUI'
-// import { LiveOpsManager } from '../liveOps/LiveOpsManager'
-import { Ghost } from '../comps/Ghost'
 import { CameraManager } from '../comps/Camera/CameraManager'
+import { CashoutChart } from '../comps/CashoutChart.js'
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -44,7 +41,7 @@ export default class GameScene extends Phaser.Scene {
     this.bonusCount = 0
     this.bonusCountAmount = 0
 
-    this.bonzaProbabilities = 0.35 // 0.25 / dev -> server
+    this.bonzaProbabilities = 0.25 // 0.25 / dev -> server
     this.minBonzaRandom = 0.5 // для RNG - min X >=2 ?
 
     this.paused = true;
@@ -170,15 +167,24 @@ export default class GameScene extends Phaser.Scene {
   create() {
     // this.game.events.on('blur', () => this.onAppBlur())
     // this.game.events.on('focus', () => this.onAppFocus())
+
+    // dev
     this.cam = this.cameras.main
+    // this.cam.postFX.enabled = true;
 
-    const cm = this.cam.postFX.addColorMatrix()
-    cm.desaturateLuminance();
-    cm.hue(110);
-    cm.saturate(0.35);
-    // this.cam.postFX.addGlow()
+    // console.log(Phaser.VERSION);
+    // console.log(this.cam.postFX);
 
-    this.crt = this.plugins.get('rexcrtpipelineplugin').add(this.cam, {
+    // const cm = this.cam.postFX.addColorMatrix()
+    // cm.desaturateLuminance();
+    // cm.hue(110);
+    // cm.saturate(0.35);
+    // // this.cam.postFX.addGlow()
+
+    // console.log(this.cam.postFX.enabled); // должно быть true
+    // console.log(this.cam.postFX.list);
+
+    this.crt = this.plugins.get('rexCrtPipeline').add(this.cam, {
       warpX: 0.2,
       warpY: 0.2,
       scanLineStrength: 0.2,
@@ -207,7 +213,6 @@ export default class GameScene extends Phaser.Scene {
     // this.cashoutChart = new CashoutChart(this)
 
     // this.liveOps = new LiveOpsManager(this) // нужно изучить
-    // this.ghost = new Ghost(this)
 
     // вынести в отдельный модуль и переключать на блок Х
     // this.header = this.add
@@ -225,12 +230,13 @@ export default class GameScene extends Phaser.Scene {
     })
       .setOrigin(0.5, 0)
       .setDepth(100)
-
-    this.headerBonza = this.add.image(320, 10, 'header_bonza')
-      .setOrigin(0.5, 0)
       .setAlpha(0)
+
+    this.headerBonza = this.add.image(320, 6, 'header_bonza')
+      .setOrigin(0.5, 0)
+      .setAlpha(1)
       .setScale(1)
-      .setDepth(100)
+      .setDepth(0)
 
 
     this.createParticles() // эммитер передается в Ball
@@ -239,7 +245,7 @@ export default class GameScene extends Phaser.Scene {
     this.countdownCounter = new CountdownCounter(this)
     this.moneyCounter = new MoneyCounter(this, this.initialDeposit)
     this.modeLabel = new ModeLabel(this)
-    // this.skull = new Skull(this)
+
     this.ball = new Ball(this, this.emitter,) // this.bounceHandler.bind(this)
     this.platforms = new Platforms(this)
 
@@ -387,7 +393,11 @@ export default class GameScene extends Phaser.Scene {
     })
   }
   handleCashout(method) {
-    // console.log('handleCashout method', method)
+    console.log('handleCashout method', method)
+    // dev
+    this.timeCashout = new Date().getTime()
+    // console.log('cashoutHandler timeNow', timeNow)
+
     this.setCashOutAllowed(false)
 
     this.hasCashOut = true
@@ -412,6 +422,7 @@ export default class GameScene extends Phaser.Scene {
 
     // finish?
     // this.fsm.toFinish()
+    this.fsm.toCashout()
   }
   createEvents() {
     // первый раунд ждём ручного старта
@@ -551,28 +562,24 @@ export default class GameScene extends Phaser.Scene {
       // console.log('FSM state:', state)
       switch (state) {
         case 'COUNTDOWN':
-          // this.events.emit('gameEvent', {
-          //   mode: 'COUNTDOWN',
-          //   betValue: this.currentBetValue,
-          // })
           this.countdown()
           break
+
         case 'START':
-          // this.events.emit('gameEvent', {
-          //   mode: 'START',
-          //   hasBet: this.hasBet,
-          // })
           this.startRound()
           break
+
+        case 'CRASH':
+          this.playCrash()
+          // this.time.delayedCall(800, () => this.fsm.toFinish())
+          break
+
+        case 'CASHOUT':
+          this.playCashout()
+          // this.time.delayedCall(400, () => this.fsm.toFinish())
+          break
+
         case 'FINISH':
-          // this.events.emit('gameEvent', {
-          //   mode: 'FINISH',
-          //   hasBet: this.hasBet,
-          //   hasCashOut: this.hasCashOut,
-          //   cashOutAllowed: this.cashOutAllowed,
-          //   stakeValue: this.stakeValue,
-          //   count: this.bounceCount,
-          // })
           this.finish()
           break
       }
@@ -738,9 +745,14 @@ export default class GameScene extends Phaser.Scene {
     } else {
       // не бонза
       this.time.delayedCall(duration, () => {
-        this.onHit(1)
+        if (this.hasCashOut) {
+          const timeNow = new Date().getTime()
+          const timeDiff = timeNow - this.timeCashout
+          console.log('timeDiff after cashout', timeDiff)
+        }
+        if (this.paused) return
 
-        if (this.isCrashed) return
+        this.onHit(1)
         this.time.delayedCall(0, () => {
           this.onBounce(1)
         })
@@ -771,10 +783,12 @@ export default class GameScene extends Phaser.Scene {
     // })
   }
   onHit(amount) {
-    // console.log('scene onHit', amount)
+    // console.log('scene onHit')
+
     this.checkCrash(this.bounceCount)
     // ещё надо чекать последнюю платформу
-    if (this.isCrashed) this.fsm.toFinish()
+    // if (this.isCrashed) this.fsm.toFinish()
+    if (this.isCrashed) this.fsm.toCrash()
     else {
       const multiplier = this.payTable[this.bounceCount].multiplier
       const nextMultiplier = this.payTable[this.bounceCount + amount] ?
@@ -797,7 +811,7 @@ export default class GameScene extends Phaser.Scene {
       if (this.bounceCount === 0 && !this.cashOutAllowed)
         this.setCashOutAllowed(true)
 
-      if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
+      // if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
 
       this.bounceCount += amount
 
@@ -842,9 +856,22 @@ export default class GameScene extends Phaser.Scene {
       // bonzaCount: this.bonzaCount
     })
 
+    // // здесь нет multiplier, не проверить авто-кэш-аут? 
+    // const multiplier = this.payTable[this.bounceCount - 1].multiplier // dev
+    // if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
+
+    // if (this.paused) return
+    // а как же бонза?
+
     let delayBeforeFall = this.duration
     if (this.bonzaCount > 0) delayBeforeFall = 1000
     this.time.delayedCall(delayBeforeFall, () => {
+      // dev
+      // здесь не должно быть проверки?
+      const multiplier = this.payTable[this.bounceCount - 1].multiplier // dev
+      if (this.currentAutoSetting.cashout > 0) this.checkAutoCashout(multiplier)
+      if (this.paused) return // dev
+
       this.fallStarter()
     })
 
@@ -859,6 +886,42 @@ export default class GameScene extends Phaser.Scene {
     // this.time.delayedCall(this.duration, () => {
     //   this.onHit()
     // })
+  }
+  playCrash() {
+    console.log('playCrash')
+    this.paused = true;
+    this.setCashOutAllowed(false)
+
+    this.events.emit('gameEvent', {
+      mode: 'CRASH',
+      isCrashed: this.isCrashed,
+      hasBet: this.hasBet,
+      hasCashOut: this.hasCashOut,
+      stakeValue: this.stakeValue,
+      count: this.bounceCount,
+    })
+
+    // пауза перед финишем
+    this.time.addEvent({
+      delay: 100,
+      callback: () => {
+        // console.timeEnd('Round time')
+        this.fsm.toFinish()
+      },
+    })
+  }
+  playCashout() {
+    console.log('playCashout')
+    this.paused = true;
+    this.setCashOutAllowed(false)
+
+    this.time.addEvent({
+      delay: 100,
+      callback: () => {
+        // console.timeEnd('Round time')
+        this.fsm.toFinish()
+      },
+    })
   }
   finish() {
     // console.log('this.cashOutAllowed', this.cashOutAllowed)
@@ -881,7 +944,7 @@ export default class GameScene extends Phaser.Scene {
     })
 
     this.time.addEvent({
-      delay: 1000,
+      delay: this.duration,
       callback: () => {
         // console.timeEnd('Round time')
         this.fsm.toCountdown()
@@ -939,6 +1002,7 @@ export default class GameScene extends Phaser.Scene {
     }
   }
   checkAutoCashout(multiplier) {
+    // console.log('checkAutoCashout', multiplier, this.currentAutoSetting.cashout)
     if (
       this.cashOutAllowed &&
       this.hasBet &&

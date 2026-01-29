@@ -2,7 +2,10 @@ export class RiskSettingNotice {
   constructor(scene) {
     this.scene = scene
     this.x = this.scene.sceneCenterX
-    this.y = 70 // 730
+    this.y = 100 // 730
+
+    // this.x = 620
+    // this.y = 850 // 730
 
     // this.label = scene.add
     //   .text(this.x, this.y, 'New settings:', {
@@ -20,7 +23,7 @@ export class RiskSettingNotice {
         // color: labelColor,
         color: this.scene.textColors.red
       })
-      .setOrigin(0.5, 0)
+      .setOrigin(0.5)
       .setAlign('center')
       .setAlpha(0)
 

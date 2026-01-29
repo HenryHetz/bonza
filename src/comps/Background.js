@@ -17,7 +17,7 @@ export class Background {
       .setScale(this.scale)
     // .setDepth(-10)
 
-    this.createEvents()
+    // this.createEvents()
   }
   createEvents() {
     this.scene.events.on('gameEvent', (data) => {
@@ -36,7 +36,7 @@ export class Background {
   }
   handleEvent(data) {
     if (data.mode === 'COUNTDOWN') {
-      this.reset()
+      // this.reset()
     }
     if (data.mode === 'ROUND_PREPARE') {
       // this.reset()
@@ -46,13 +46,13 @@ export class Background {
       // this.move()
     }
     if (data.mode === 'HIT') {
-      if (data.multiplier >= 1) {
-        // this.bg.alpha = this.alpha - data.count / 200
-      }
+      // if (data.multiplier >= 1) {
+      //   // this.bg.alpha = this.alpha - data.count / 200
+      // }
     }
     if (data.mode === 'FINISH') {
-      this.stop()
-      this.bg.alpha = this.alpha
+      // this.stop()
+      // this.bg.alpha = this.alpha
     }
   }
   reset() {

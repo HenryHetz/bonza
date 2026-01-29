@@ -20,7 +20,7 @@ export class GameControlPanel {
   }
 
   createElements() {
-    const buttonY = 11.5 * this.gridUnit
+    const buttonY = 920 //11.5 * this.gridUnit
     const indent = this.scene.buttonIndent
     const nameSpacing = this.scene.buttonNameSpacing
 
@@ -74,13 +74,13 @@ export class GameControlPanel {
 
     // Auto
     this.autoCashoutLabel = this.scene.add
-      .text(this.stakeCounter.x, this.stakeCounter.y + 40, '', {
+      .text(this.stakeCounter.x, this.stakeCounter.y + 40, '', { // this.stakeCounter.x
         font: labelFont,
         // color: labelColor,
         color: this.scene.textColors.red
       })
       .setOrigin(0.5)
-      .setAlign('center')
+      .setAlign('left')
       .setAlpha(0)
 
 
@@ -222,7 +222,8 @@ export class GameControlPanel {
       // GameState
       COUNTDOWN: this.onCountdown,
       START: this.onRound,
-      FINISH: this.onFinish,
+      // FINISH: this.onFinish,
+      CRASH: this.onCrash,
 
       // GameAction
       CASHOUT: this.onCashout,
@@ -261,7 +262,11 @@ export class GameControlPanel {
       this.buttonAction.setAlpha(0.7)
     }
   }
-
+  onCrash(data) {
+    if (!data.hasCashOut && data.hasBet) {
+      this.updateStakeText(0)
+    }
+  }
   onFinish(data) {
     if (!data.hasCashOut && data.hasBet) {
       this.updateStakeText(0)

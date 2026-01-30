@@ -48,7 +48,7 @@ export default class GameScene extends Phaser.Scene {
     // dev 
     this.isDev = true
     this.timeScale = 1
-    // this.timeScale = 0.1 // dev
+    // this.timeScale = -0.9 // dev
     this.gameSpeed = DEFAULT_GAME_CONFIG.gameSpeed
     if (this.gameSpeed > 1) {
       let value = this.gameSpeed - this.timeScale

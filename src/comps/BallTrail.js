@@ -86,7 +86,9 @@ export class BallTrail {
 
         ctx.fillStyle = g;
 
-        const rad = Math.min(this.w * 0.5, hh * 0.5);
+        // const rad = Math.min(this.w * 0.5, hh * 0.5);
+
+        const rad = 0
 
         ctx.beginPath();
         ctx.moveTo(rad, 0);

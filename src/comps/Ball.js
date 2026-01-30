@@ -22,24 +22,27 @@ export class Ball {
     this.emitter = emitter
     this.bounceHandler = bounceHandler
     this.depth = 20
+    this.isCircle = true
 
     this.color = this.scene.standartColors.red // красный цвет
+    this.darkColor = this.scene.standartColors.dark_red
     // this.ball = scene.add
     //   .image(this.x, this.y, 'ball')
     //   .setOrigin(0.5, 1)
     //   .setScale(0.8)
     //   .setAlpha(0)
 
-    this.ball = scene.add
-      .ellipse(this.x, this.y, this.diameter, this.diameter, this.color)
-      .setOrigin(0.5, 1)
-      .setAlpha(0)
-      .setDepth(this.depth)
+    // this.ball_1 = scene.add
+    //   .ellipse(this.x, this.y, this.diameter, this.diameter, this.color)
+    //   .setOrigin(0.5, 1)
+    //   .setAlpha(1)
+    //   .setDepth(this.depth)
+    // console.log('drawCircle', this.x, this.y, this.ball)
 
     // dev чтобы шар превращался в квадрат
-    // this.ball = scene.add.graphics().setDepth(this.depth).setAlpha(1)
-    // this.r = this.diameter / 2
-    // this.redraw()
+    this.ball = scene.add.graphics().setDepth(this.depth).setAlpha(1)
+    // this.drawSquare()
+    this.drawCircle()
 
     // scene.tweens.add({
     //   targets: this.r,
@@ -47,7 +50,7 @@ export class Ball {
     //   delay: 500,
     //   duration: 1000,
     //   ease: 'Linear',
-    //   onUpdate: () => this.redraw()
+    //   onUpdate: () => this.drawSquare()
     // });
 
     this.state = 'idle'
@@ -136,10 +139,12 @@ export class Ball {
     if (data.mode === 'COUNTDOWN') {
     }
     if (data.mode === 'ROUND_PREPARE') {
-      this.ball.setFillStyle(this.scene.standartColors.red)
+      // this.ball.setFillStyle(this.scene.standartColors.red)
       // this.ball.alpha = 1
       this.isActive = true
       this.reset()
+      // как переключаться между режимами?
+      this.checkShape(this.scene.bonzaCount)
     }
     if (data.mode === 'START') {
       // this.fall() // 
@@ -167,10 +172,25 @@ export class Ball {
     if (data.mode === 'CRASH') {
       this.crashHandler(data)
     }
+    if (data.mode === 'CRASH') {
+      this.crashHandler(data)
+    }
 
   }
+  checkShape(mode) {
+    if (mode && this.isCircle) this.transToSquare()
+    if (!mode && !this.isCircle) this.transToCircle()
+  }
+  transToSquare() {
+    this.isCircle = false
+    this.drawSquare()
+  }
+  transToCircle() {
+    this.isCircle = true
+    this.drawCircle()
+  }
   crashHandler(data) {
-    console.log('crashHandler', data)
+    // console.log('crashHandler', data)
     this.isActive = false
 
     this.stopTween()
@@ -420,7 +440,7 @@ export class Ball {
         ease: 'Quad.easeIn', // 'Sine.easeIn'
         onUpdate: (tween) => {
           // рисовать след
-          this.trail.render(this.ball.y - 20);
+          this.trail.render(this.ball.y - 60);
         },
         onComplete: () => {
           if (load.speed === 3) {
@@ -437,7 +457,7 @@ export class Ball {
                 // ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
                 // ease: 'Sine.easeIn',
                 onComplete: () => {
-                  this.trail.render(this.ball.y - 20, this.y - 200);
+                  this.trail.render(this.ball.y - 60, this.y - 200);
                   for (let index = 1; index <= load.amount; index++) {
                     this.scene.platforms.removeBlock()
                   }
@@ -620,20 +640,37 @@ export class Ball {
     return this.ball.y
   }
 
-  redraw() {
+  drawSquare() {
     const w = this.diameter;
     const h = this.diameter;
+    const r = 10
 
     this.ball.clear();
     this.ball.fillStyle(this.color, 1);
 
     // если ваша позиция - центр:
     const x = this.x - w / 2;
-    const y = this.y - h / 2;
+    const y = 0 - h;
 
-    this.ball.fillRoundedRect(this.x - this.diameter / 2, this.y - this.diameter, w, h, this.r);
+    this.ball.fillRoundedRect(x, y, w, h, r);
 
-    console.log('ball', this.x, this.y, this.ball)
+    // console.log('drawSquare', this.x, this.y, x, y)
+  }
+  drawCircle() {
+    const w = this.diameter;
+    const h = this.diameter;
+    const r = this.diameter / 2
+
+    this.ball.clear();
+    this.ball.fillStyle(this.color, 1);
+
+    // если ваша позиция - центр:
+    const x = this.x - w / 2;
+    const y = 0 - h;
+
+    this.ball.fillRoundedRect(x, y, w, h, r);
+
+    // console.log('drawCircle', this.x, this.y, x, y)
   }
 }
 

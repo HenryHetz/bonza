@@ -220,7 +220,8 @@ export class Ball {
       // вообще нам надо понимать когда пришёл ответ от сервера о кэшауте
       // а потом показывать краш или нет
       // dev
-      let ballMoveDistance = 100
+      const fix = 100
+      let ballMoveDistance = fix
       if (distToGo < ballMoveDistance) ballMoveDistance = distToGo
 
       // return
@@ -228,17 +229,19 @@ export class Ball {
         this.scene.tweens.add({
           targets: this.ball,
           y: this.ball.y + ballMoveDistance,
-          alpha: 0,
+          // alpha: 0,
           duration: this.duration,
           ease: 'Quad.easeOut',
           onComplete: () => {
             // dev
-            if (ballMoveDistance < 100) {
+            // если шар коснулся блока, мы должны или засчиать Х, или краш
+            // вот и всё
+            if (ballMoveDistance < fix) {
               // искры показать...
-              // this.emitter.explode(30, this.ball.x, this.ball.y)
+              this.emitter.explode(30, this.x, this.hitPointY)
 
             }
-            this.hide()
+            // this.hide()
           }
         })
     } else {

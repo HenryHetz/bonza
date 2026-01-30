@@ -118,7 +118,7 @@ export default class GameScene extends Phaser.Scene {
       blue: 0x05edff, // 6CFFFF // #3DB6FF
       yellow: 0xfcd912, // orange: 0xFF9B0F yellow: 0xfcd912
       black: 0x000000,
-      gray: 0xD9D9D9,
+      gray: 0xc0c0c0, //  D9D9D9
       wrapper: 0x212838,
       dark_red: 0x920000,
       dark_gray: 0x262626, // 262626 0x3d3d3d
@@ -129,7 +129,7 @@ export default class GameScene extends Phaser.Scene {
     this.textColors = {
       white: '#FBFAF8',
       red: '#FF0037', // '#E60000' '#920000ff'
-      gray: '#bcbcbcff', // '#cccccc' 'rgba(101, 101, 101, 1)'
+      gray: '#bcbcbcff', // '#cccccc' '#c0c0c0ff'
       yellow: '#fcd912',
       blue: '#05edff',
       black: '#000000',

@@ -54,7 +54,7 @@ export default class GameScene extends Phaser.Scene {
       let value = this.gameSpeed - this.timeScale
       this.setTimeScale(value)
     }
-    //this.setTimeScale(-0.8) // dev
+    // this.setTimeScale(-0.5) // dev
     //this.time.timeScale = this.timeScale
     this.duration = 500 // это не duration, а половина цикла
 
@@ -122,13 +122,12 @@ export default class GameScene extends Phaser.Scene {
       wrapper: 0x212838,
       dark_red: 0x920000,
       dark_gray: 0x262626, // 262626 0x3d3d3d
-      // dark_red: 0x960020,
     };
 
     // text
     this.textColors = {
       white: '#FBFAF8',
-      red: '#FF0037', // '#E60000' '#920000ff'
+      red: '#FF0037', // '#E60000' '#770000ff'
       gray: '#bcbcbcff', // '#cccccc' '#c0c0c0ff'
       yellow: '#fcd912',
       blue: '#05edff',
@@ -713,7 +712,7 @@ export default class GameScene extends Phaser.Scene {
     let amount = 1
 
     const fallTime = 100
-    const drillTime = 200
+    const drillTime = 100
 
     // console.log('this.bonzaCount', this.bonzaCount)
 
@@ -1219,7 +1218,7 @@ export default class GameScene extends Phaser.Scene {
     // random = 0.999999999 // dev 
     if (this.bonzaCount > 0) {
       // random *= 2 // bonza 2 - больше 1 часто, значит максимум
-      random = Phaser.Math.FloatBetween(this.minBonzaRandom, 1) // bonza 1
+      random = Phaser.Math.FloatBetween(this.minBonzaRandom, 1) // minBonzaRandom 0.5
       console.log('bonza random', random)
     }
 

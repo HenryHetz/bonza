@@ -17,7 +17,8 @@ export class DevUI {
 
     // this.scene.add.image(0, 0, 'bot_chat').setOrigin(0).setAlpha(0.2)
 
-    // this.scene.add.image(0, 0, 'grid').setOrigin(0).setAlpha(0).setDepth(100)
+    // this.scene.add.image(0, 0, 'neo').setOrigin(0).setAlpha(0).setDepth(10)
+
     this.createExitsFrame()
     this.createTunerPanel()
     this.createRulesFrame()

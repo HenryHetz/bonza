@@ -5,6 +5,7 @@ export class Ball {
   constructor(scene, emitter, bounceHandler) {
     this.scene = scene
     this.diameter = 110
+    this.radius = 10
     this.x = scene.sceneCenterX // this.scene.ballX
     this.y = scene.ballY + this.diameter / 2 // this.scene.ballY + this.diameter / 2
     this.hitPointY = this.scene.hitPointY // точка удара - и достаточно!
@@ -45,7 +46,7 @@ export class Ball {
     this.drawCircle()
 
     // scene.tweens.add({
-    //   targets: this.r,
+    //   targets: this.radius,
     //   r: 0,
     //   delay: 500,
     //   duration: 1000,
@@ -446,10 +447,36 @@ export class Ball {
           this.trail.render(this.ball.y - 60);
         },
         onComplete: () => {
+          // dev - без пробоя
+          this.removeTrail(load.drillTime * 2, 0)
+          for (let index = 0; index < load.amount; index++) {
+            setTimeout(() => {
+              this.scene.platforms.setDarkBlock(index)
+            }, load.drillTime * index);
+            // this.scene.tweens.add({
+            //   targets: this.ball,
+            //   // y: y, // var 1
+            //   alpha: 0.99, // var 2
+            //   delay: load.drillTime * index,
+            //   duration: load.drillTime, // this.duration / 2
+            //   ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+            //   // ease: 'Sine.easeIn',
+            //   onStart: () => {
+            //     this.scene.platforms.setDarkBlock(index)
+            //   },
+            //   onComplete: () => {
+
+            //     this.scene.platforms.removeBlock()
+
+            //   },
+            // })
+          }
+          return
+
+          // пробой
           if (load.speed === 3) {
             const startY = this.ball.y
             const y = this.hitPointY + load.amount * (180 / 5)
-            // this.trail.start()
 
             // пробиваем
             this.ballTween =
@@ -646,7 +673,7 @@ export class Ball {
   drawSquare() {
     const w = this.diameter;
     const h = this.diameter;
-    const r = 10
+    const r = this.radius
 
     this.ball.clear();
     this.ball.fillStyle(this.color, 1);

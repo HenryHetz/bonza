@@ -154,7 +154,7 @@ export class Platforms {
             this.lastKnownMulty = data.multiplier
             this.nextMulty = data.nextMultiplier
             this.chessPhase ^= 1
-            // this.onHit(data)
+            this.onHit(data)
             // dev
             // this.scene.countdownCounter.set(data.count + 1)
             // this.scene.countdownCounter.show(1)
@@ -250,6 +250,35 @@ export class Platforms {
         top.destroy()
         this.blocks.shift()
         // console.log('Platforms removeBlock, remaining:', this.blocks.length)
+    }
+    onHit(data) {
+        // if (data.mode === 'usu') 
+        if (data.isBonza) this.bonzaHandler(data)
+    }
+    bonzaHandler(data) {
+        // console.log('Platforms bonzaHandler', this.blocks[0])
+        return
+
+        this.scene.tweens.add({
+            targets: this.blocks[0],
+            // y: y, // var 1
+            //   alpha: 0.99, // var 2
+            scale: 1.05,
+            //   delay: load.drillTime * index,
+            yoyo: true,
+            duration: 50, // this.duration / 2
+            //   ease: 'Back.easeIn', // 'Sine.easeIn' 'Back.easeIn'
+            // ease: 'Sine.easeIn',
+            onStart: () => {
+                // this.scene.platforms.setDarkBlock(index)
+            },
+            onComplete: () => {
+
+                // this.scene.platforms.removeBlock()
+
+            },
+        })
+
     }
     onBounce(data) {
         // if (!this.blocks.length) return
@@ -940,7 +969,7 @@ export class Platforms {
         // console.log('setDarkBlock', number)
         const top = this.blocks[number || 0];
         if (!top) return
-        this.recolorBlockRect(top.__rect, this.scene.standartColors.dark_red);
+        this.recolorBlockRect(top.__rect, this.scene.standartColors.dark_red); // dark_red dark_gray
         // this.recolorBlockFrame(top.__frame, this.scene.standartColors.red);
         // top.__pattern.alpha = 0
     }

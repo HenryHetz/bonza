@@ -84,6 +84,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('rules_frame', 'assets/sprites/elements/rules_frame_2.png')
 
     this.load.image('auto_bg', 'assets/sprites/dev/auto_bg.png')
+    this.load.image('neo', 'assets/sprites/dev/neo_2.png')
 
     this.load.image('header_bonza', 'assets/sprites/elements/header_bonza.png')
 
